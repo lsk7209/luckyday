@@ -1,0 +1,60 @@
+# Production 환경 설정
+name = "cms-calculator-api"
+main = "src/workers/index.ts"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Production D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "cms-calculator-prod"
+database_id = "your-production-database-id"
+
+# Production KV Namespace
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-production-kv-id"
+
+# Production R2 Bucket
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "cms-calculator-prod-storage"
+
+# Production Queue
+[[queues.producers]]
+binding = "QUEUE"
+queue = "cms-calculator-prod-queue"
+
+[[queues.consumers]]
+queue = "cms-calculator-prod-queue"
+max_batch_size = 10
+max_batch_timeout = 30
+
+# Production Cron Triggers
+[triggers.crons]
+sitemap_refresh = "0 */6 * * *"
+index_submission = "0 2 * * *"
+analytics_aggregation = "0 3 * * *"
+broken_link_scan = "0 4 * * 1"
+content_refresh_queue = "*/30 * * * *"
+
+# Production Environment variables (실제 값으로 변경 필요)
+[vars]
+JWT_SECRET = "your-production-jwt-secret"
+INDEXNOW_KEY = "your-production-indexnow-key"
+EMAIL_API_URL = "https://api.sendgrid.com/v3/mail/send"
+EMAIL_API_KEY = "your-production-email-api-key"
+WEBHOOK_SECRET = "your-production-webhook-secret"
+GSC_CLIENT_EMAIL = "your-production-service-account@project.iam.gserviceaccount.com"
+GSC_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nyour-production-private-key\n-----END PRIVATE KEY-----"
+
+# Production CORS (도메인 변경 필요)
+[cors]
+allowed_origins = ["https://your-production-domain.com"]
+allow_credentials = true
+allow_headers = ["Authorization", "Content-Type", "X-Requested-With"]
+allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"]
+max_age = 86400
+
+[build.upload]
+format = "modules"

@@ -1,0 +1,199 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run unit tests
+      run: npm run test:ci
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        fail_ci_if_error: false
+
+  e2e:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: Run Playwright tests
+      run: npm run test:e2e
+      env:
+        BASE_URL: http://localhost:3000
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [test]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: nextjs-build
+        path: .next/
+        retention-days: 7
+
+  lighthouse:
+    name: Lighthouse Performance Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+
+    - name: Start application
+      run: npm start &
+      env:
+        PORT: 3000
+
+    - name: Wait for app to be ready
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
+
+    - name: Run Lighthouse
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        urls: |
+          http://localhost:3000
+        configPath: .lighthouserc.json
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+
+  deploy-preview:
+    name: Deploy to Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build, e2e]
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Cloudflare Wrangler
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    - name: Deploy to Cloudflare Pages (Preview)
+      run: |
+        npm run cf:deploy -- --env preview
+      env:
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build, e2e, lighthouse]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Cloudflare Wrangler
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    - name: Deploy API to Cloudflare Workers
+      run: npm run cf:deploy
+      env:
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    - name: Deploy Frontend to Cloudflare Pages
+      uses: cloudflare/pages-action@v1
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        projectName: cms-calculator
+        directory: .next
+        gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run database migrations
+      run: npm run cf:db:migrate
+
+    - name: Seed database
+      run: npm run cf:db:seed
