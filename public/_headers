@@ -1,0 +1,50 @@
+# DreamScope 보안 헤더 설정
+# Cloudflare Pages에서 자동 적용됨
+
+/*
+  # 보안 헤더
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+  # Content Security Policy (CSP)
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com https://*.googlesyndication.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://*.fontsource.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.openai.com wss://*.supabase.co; frame-ancestors 'none';
+
+  # HSTS (HTTPS 강제)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# API 라우트들 (더 엄격한 CSP)
+#/api/*
+#  Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'none'; img-src 'none'; font-src 'none'; connect-src 'none'; frame-ancestors 'none';
+
+# 관리자 페이지 (추가 보안)
+#/admin/*
+#  X-Frame-Options: SAMEORIGIN
+#  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'self';
+
+# 정적 파일들 (캐시 최적화)
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 꿈 데이터 (중간 캐시)
+/dream/*
+  Cache-Control: public, max-age=3600, s-maxage=7200
+
+# 검색 결과 (짧은 캐시)
+/api/search
+  Cache-Control: public, max-age=300, s-maxage=600
+
+# AI 해석 결과 (캐시 제한)
+/api/interpret
+  Cache-Control: private, no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# 에러 페이지
+/404.html
+  Cache-Control: public, max-age=300
+
+/500.html
+  Cache-Control: no-cache, no-store, must-revalidate

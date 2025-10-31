@@ -1,69 +1,128 @@
-name = "cms-calculator-api"
+# DreamScope Cloudflare Configuration
+name = "dreamscope-api"
 main = "src/workers/index.ts"
-compatibility_date = "2024-01-15"
+compatibility_date = "2024-10-31"
 compatibility_flags = ["nodejs_compat"]
 
-# D1 Database
-[[d1_databases]]
-binding = "DB"
-database_name = "cms-calculator-db"
-database_id = "your-database-id"
+# =================================================================
+# 데이터베이스 설정
+# =================================================================
 
-# KV Namespace for caching
+# KV Namespace for caching (검색 결과, 꿈 데이터 캐싱)
 [[kv_namespaces]]
 binding = "CACHE"
-id = "your-kv-id"
-preview_id = "your-kv-preview-id"
+id = "dreamscope-cache"
+preview_id = "dreamscope-cache-preview"
 
-# R2 Bucket for file storage
-[[r2_buckets]]
-binding = "STORAGE"
-bucket_name = "cms-calculator-storage"
+# =================================================================
+# 크론 트리거 설정 (DreamScope 자동화)
+# =================================================================
 
-# Queue for background jobs
-[[queues.producers]]
-binding = "QUEUE"
-queue = "cms-calculator-queue"
-
-[[queues.consumers]]
-queue = "cms-calculator-queue"
-max_batch_size = 10
-max_batch_timeout = 30
-
-# Cron Triggers for scheduled jobs
 [triggers.crons]
-# 사이트맵 갱신 (6시간마다)
-sitemap_refresh = "0 */6 * * *"
-# 색인 제출 (매일 오전 2시)
-index_submission = "0 2 * * *"
-# 분석 데이터 집계 (매일 오전 3시)
-analytics_aggregation = "0 3 * * *"
-# 깨진 링크 스캔 (매주 월요일 오전 4시)
-broken_link_scan = "0 4 * * 1"
-# 콘텐츠 리프레시 큐 처리 (30분마다)
-content_refresh_queue = "*/30 * * * *"
+# 사이트맵 자동 생성 (매일 오전 3시 10분)
+sitemap_generate = "10 3 * * *"
+# IndexNow 자동 전송 (매일 오전 3시 20분)
+indexnow_submit = "20 3 * * *"
+# 인기 검색어 집계 (매일 오전 3시 30분)
+popularity_update = "30 3 * * *"
+# 꿈 관계 그래프 재계산 (매일 오전 4시)
+relation_rebuild = "0 4 * * *"
+# 검색 로그 정리 (매주 일요일 오전 5시)
+log_cleanup = "0 5 * * 0"
 
-# Environment variables
+# =================================================================
+# 환경 변수 설정
+# =================================================================
+
 [vars]
-JWT_SECRET = "your-jwt-secret"
-INDEXNOW_KEY = "your-indexnow-key"
-EMAIL_API_URL = "https://api.sendgrid.com/v3/mail/send"
-EMAIL_API_KEY = "your-email-api-key"
-WEBHOOK_SECRET = "your-webhook-secret"
-GSC_CLIENT_EMAIL = "your-service-account-email"
-GSC_PRIVATE_KEY = "your-private-key"
+# OpenAI API 키 (필수)
+OPENAI_API_KEY = "your-openai-api-key"
 
-# CORS settings for API (Production에서는 더 엄격하게 설정)
+# OpenAI 설정
+OPENAI_MODEL = "gpt-3.5-turbo"
+OPENAI_MAX_TOKENS = "1000"
+
+# Supabase 연결 (필수)
+SUPABASE_URL = "your-supabase-url"
+SUPABASE_SERVICE_KEY = "your-supabase-service-key"
+
+# 검색 설정
+SEARCH_CACHE_TTL = "3600"  # 1시간
+MAX_SEARCH_RESULTS = "50"
+
+# AI 해석 설정
+AI_CACHE_TTL = "86400"  # 24시간
+MAX_AI_SESSIONS_PER_DAY = "100"
+
+# 보안 설정
+RATE_LIMIT_REQUESTS = "100"  # 분당 요청 수
+RATE_LIMIT_WINDOW = "60"     # 윈도우 (초)
+
+# =================================================================
+# CORS 설정
+# =================================================================
+
 [cors]
-allowed_origins = ["http://localhost:3000", "https://your-domain.com"]
+allowed_origins = [
+  "http://localhost:3000",
+  "http://localhost:8788",  # Cloudflare dev server
+  "https://dreamscope.pages.dev",
+  "https://your-domain.com"
+]
 allow_credentials = true
-allow_headers = ["Authorization", "Content-Type", "X-Requested-With"]
+allow_headers = ["Authorization", "Content-Type", "X-Requested-With", "X-API-Key"]
 allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"]
 max_age = 86400
 
-# 보안 헤더 (추가 권장)
-[build.upload]
-format = "modules"
+# =================================================================
+# 보안 헤더 (Cloudflare Pages에서 처리)
+# =================================================================
 
-# Rate limiting (추가 권장)
-# 현재 Wrangler에서는 직접 지원하지 않으므로 코드에서 구현
+# Headers 설정은 _headers 파일이나 Cloudflare Pages에서 처리
+# Content Security Policy, HSTS, etc.
+
+# =================================================================
+# Pages Functions 설정 (선택사항)
+# =================================================================
+
+# Cloudflare Pages에서 API를 처리할 경우
+# [pages_build_output_dir] = "dist"
+# [pages_build_config]
+# build_command = "npm run build"
+# destination_dir = "dist"
+# root_dir = "."
+
+# =================================================================
+# 모니터링 및 로깅
+# =================================================================
+
+# 로그 레벨 (debug, info, warn, error)
+LOG_LEVEL = "info"
+
+# 에러 알림 (선택사항)
+ERROR_WEBHOOK_URL = "https://hooks.slack.com/your-webhook"
+
+# =================================================================
+# 개발 환경 설정
+# =================================================================
+
+# 로컬 개발 시 다른 값들로 오버라이드 가능
+# wrangler dev --var OPENAI_API_KEY:sk-your-key-here
+
+# =================================================================
+# 배포 설정
+# =================================================================
+
+# Pages 배포 설정
+# wrangler pages deploy .next --compatibility-date=2024-10-31
+
+# API 배포 설정
+# wrangler deploy
+
+# =================================================================
+# 추가 권장 설정
+# =================================================================
+
+# Rate limiting은 코드에서 구현 (express-rate-limit 패턴)
+# Cache warming은 cron job에서 처리
+# Backup은 Supabase에서 자동으로 처리됨

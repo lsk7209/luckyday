@@ -27,7 +27,16 @@
     "cf:db:seed:prod": "wrangler d1 execute cms-calculator-prod --config wrangler.production.toml --file=src/workers/seed.sql",
     "cf:tail": "wrangler tail",
     "cf:tail:staging": "wrangler tail --config wrangler.staging.toml",
-    "cf:tail:prod": "wrangler tail --config wrangler.production.toml"
+    "cf:tail:prod": "wrangler tail --config wrangler.production.toml",
+    "pages:build": "next build",
+    "pages:deploy": "npm run pages:build && wrangler pages deploy .next --compatibility-date=2024-10-31",
+    "pages:deploy:staging": "npm run pages:build && wrangler pages deploy .next --branch staging --compatibility-date=2024-10-31",
+    "pages:deploy:prod": "npm run pages:build && wrangler pages deploy .next --branch main --compatibility-date=2024-10-31",
+    "lighthouse": "lhci autorun",
+    "lighthouse:local": "lhci autorun --config=.lighthouserc.json",
+    "supabase:gen-types": "npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/types/supabase.ts",
+    "db:seed": "npx supabase db reset --db-url YOUR_DB_URL",
+    "db:migrate": "npx supabase db push --db-url YOUR_DB_URL"
   },
   "dependencies": {
     "@fontsource/pretendard": "^5.2.5",
