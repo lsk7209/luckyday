@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamScope - 오프라인</title>
+  <meta name="description" content="인터넷 연결이 불안정합니다. 오프라인 모드에서 이용 가능한 기능들을 확인하세요.">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+
+    .features {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+
+    .feature-icon {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🌙</div>
+
+    <h1>인터넷 연결이 불안정합니다</h1>
+
+    <p>
+      DreamScope의 일부 기능이 오프라인 모드에서 제한될 수 있습니다.
+      인터넷 연결이 복구되면 모든 기능을 정상적으로 이용하실 수 있습니다.
+    </p>
+
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">📚</span>
+        <span>캐시된 꿈 해석 내용 열람 가능</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔍</span>
+        <span>이전에 검색한 꿈 목록 확인</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">⭐</span>
+        <span>즐겨찾기한 꿈 북마크</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">📝</span>
+        <span>오프라인 메모 기능</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="window.location.reload()">
+        🔄 연결 상태 확인
+      </button>
+
+      <button class="btn btn-secondary" onclick="window.history.back()">
+        ← 이전 페이지로 돌아가기
+      </button>
+    </div>
+
+    <div class="status">
+      <strong>연결 상태:</strong> 오프라인 모드
+      <br>
+      <small>마지막 동기화: <span id="lastSync">-</span></small>
+    </div>
+  </div>
+
+  <script>
+    // 마지막 동기화 시간 표시
+    const lastSyncElement = document.getElementById('lastSync');
+    const lastSync = localStorage.getItem('dreamscope-last-sync');
+
+    if (lastSync) {
+      const date = new Date(parseInt(lastSync));
+      lastSyncElement.textContent = date.toLocaleString('ko-KR');
+    } else {
+      lastSyncElement.textContent = '알 수 없음';
+    }
+
+    // 온라인 상태 감지
+    window.addEventListener('online', function() {
+      // 온라인으로 복귀하면 자동 새로고침
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    });
+
+    // 오프라인 상태 표시
+    window.addEventListener('offline', function() {
+      console.log('오프라인 모드로 전환되었습니다.');
+    });
+
+    // 주기적으로 연결 상태 확인
+    setInterval(() => {
+      if (navigator.onLine) {
+        fetch('/api/health', { method: 'HEAD' })
+          .then(() => {
+            // 서버 연결 성공
+            document.querySelector('.status').innerHTML = `
+              <strong>연결 상태:</strong> 온라인
+              <br>
+              <small>서버 연결 확인됨</small>
+            `;
+          })
+          .catch(() => {
+            // 서버 연결 실패
+            document.querySelector('.status').innerHTML = `
+              <strong>연결 상태:</strong> 제한적 연결
+              <br>
+              <small>네트워크 연결은 되지만 서버에 연결할 수 없음</small>
+            `;
+          });
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

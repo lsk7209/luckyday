@@ -1,0 +1,95 @@
+{
+  "name": "DreamScope - AI 꿈 해몽",
+  "short_name": "DreamScope",
+  "description": "AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "categories": ["lifestyle", "productivity", "utilities"],
+  "lang": "ko",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "DreamScope 모바일 화면"
+    },
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "DreamScope 데스크톱 화면"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "꿈 사전",
+      "short_name": "꿈 사전",
+      "description": "꿈 심볼 검색 및 목록",
+      "url": "/dream",
+      "icons": [
+        {
+          "src": "/icon-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "AI 해몽",
+      "short_name": "AI 해몽",
+      "description": "개인 맞춤 AI 꿈 분석",
+      "url": "/ai",
+      "icons": [
+        {
+          "src": "/icon-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "scope": "/",
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

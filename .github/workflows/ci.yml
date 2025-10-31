@@ -1,10 +1,11 @@
-name: CI/CD Pipeline
+name: DreamScope CI/CD Pipeline
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -29,7 +30,9 @@ jobs:
       run: npm run lint
 
     - name: Run unit tests
-      run: npm run test:ci
+      run: npm run test -- --coverage --watchAll=false
+      env:
+        NODE_ENV: test
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
@@ -136,6 +139,9 @@ jobs:
       with:
         urls: |
           http://localhost:3000
+          http://localhost:3000/dream
+          http://localhost:3000/dream/baem-snake-dream
+          http://localhost:3000/ai
         configPath: .lighthouserc.json
         uploadArtifacts: true
         temporaryPublicStorage: true
@@ -158,14 +164,15 @@ jobs:
 
     - name: Deploy to Cloudflare Pages (Preview)
       run: |
-        npm run cf:deploy -- --env preview
+        npm run pages:deploy:staging
       env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     needs: [build, e2e, lighthouse]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -173,27 +180,60 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Cloudflare Wrangler
-      uses: cloudflare/wrangler-action@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        node-version: '20'
+        cache: 'npm'
 
-    - name: Deploy API to Cloudflare Workers
-      run: npm run cf:deploy
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup Supabase CLI
+      run: |
+        npm install -g supabase
+        echo "SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}" >> $GITHUB_ENV
+
+    - name: Deploy to Cloudflare Pages
+      run: npm run pages:deploy:prod
       env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-    - name: Deploy Frontend to Cloudflare Pages
-      uses: cloudflare/pages-action@v1
-      with:
-        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        projectName: cms-calculator
-        directory: .next
-        gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run Supabase migrations
+      run: npm run db:migrate
+      env:
+        SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
-    - name: Run database migrations
-      run: npm run cf:db:migrate
+    - name: Seed Supabase database
+      run: npm run db:seed
+      env:
+        SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
-    - name: Seed database
-      run: npm run cf:db:seed
+    - name: Run health check
+      run: |
+        sleep 30
+        curl -f https://dreamscope.pages.dev/api/health || exit 1
+
+    - name: Submit to search engines
+      run: |
+        # IndexNow 제출
+        curl -X POST "https://api.indexnow.org/indexnow" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "host": "dreamscope.pages.dev",
+            "key": "${{ secrets.INDEXNOW_KEY }}",
+            "urlList": [
+              "https://dreamscope.pages.dev",
+              "https://dreamscope.pages.dev/dream",
+              "https://dreamscope.pages.dev/ai"
+            ]
+          }'
+
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "🎉 DreamScope 배포 완료!"
+        echo "Frontend: https://dreamscope.pages.dev"
+        echo "Admin: https://dreamscope.pages.dev/admin"
+        # Slack 알림 등 추가 가능
