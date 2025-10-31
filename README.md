@@ -1,8 +1,8 @@
-# luckyday
+# 🌙 DreamScope
 
-> **럭키데이 프로젝트 - 행운의 날을 찾아주는 웹 애플리케이션**
+> **AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读**
 
-이 프로젝트는 사용자에게 행운의 날짜, 시간, 숫자를 추천해주는 재미있는 웹 애플리케이션입니다.
+이 프로젝트는 꿈을 단순한 예언이 아닌 심리학, 문화, 상징학 관점에서 분석하는 AI 기반 꿈 해몽 플랫폼입니다.
 
 ## ✨ 주요 기능
 
@@ -12,56 +12,55 @@
 - **Pretendard Variable** 폰트 (SEO 최적화)
 - 반응형 디자인 + 다크모드 지원
 - 접근성 (a11y) 완전 준수
+- **React Query** 데이터 페칭 (실시간 API 연동)
+
+### 🧠 AI 해몽 시스템
+- **OpenAI GPT** 기반 꿈 분석
+- 심리학·문화·상징학 다각적 해석
+- 개인 맞춤형 가설 생성
+- 긍정/주의 신호 분석
+- 관련 꿈 추천
+
+### 📚 꿈 사전
+- **5,000개 이상** 꿈 심볼 데이터베이스
+- 카테고리별 분류 (동물, 감정, 장소, 물건 등)
+- 검색 및 자동완성 기능
+- 인기도 기반 정렬
 
 ### 🚀 백엔드
-- **Cloudflare Workers** + **D1 Database**
-- **Cloudflare KV** + **R2 Storage**
+- **Supabase** Postgres 데이터베이스
+- **Cloudflare Functions** + KV 캐싱
 - RESTful API 디자인
-- 실시간 분석 및 모니터링
+- 실시간 검색 로그 분석
 
-### 📊 콘텐츠 관리
-- **블로그 포스트** - SEO 최적화된 블로그
-- **가이드** - 단계별 사용자 가이드
-- **계산기** - 인터랙티브 계산 도구
-
-### 🤖 자동화 기능
-- **자동 색인** (GSC + IndexNow + Bing + Naver)
-- **콘텐츠 검증** 및 **품질 점수** 계산
-- **내부 링크 자동 추천**
-- **FAQ 자동 생성**
-- **웹훅 연동** (Slack, Notion, Sheets)
-
-### 📈 분석 및 추적
-- **1st-party Analytics** (GDPR 준수)
-- **실시간 대시보드**
-- **채널별 성과 분석**
-- **사용자 행동 추적**
+### 📊 SEO 최적화
+- **JSON-LD 구조화 데이터** (Article, FAQPage)
+- 자동 메타 태그 생성
+- **Lighthouse 92점 이상** 목표
+- 검색 엔진 최적화
 
 ## 🏗️ 프로젝트 구조
 
 ```
 src/
 ├── app/                    # Next.js App Router
-│   ├── admin/             # 관리자 콘솔
-│   ├── blog/              # 블로그 페이지
-│   ├── guide/             # 가이드 페이지
-│   ├── utility/           # 계산기 페이지
+│   ├── dream/             # 꿈 사전 페이지
+│   ├── ai/                # AI 해몽 페이지
+│   ├── api/               # API 라우트
 │   ├── layout.tsx         # 루트 레이아웃
 │   └── page.tsx           # 홈페이지
 ├── components/            # 재사용 컴포넌트
-│   ├── layout/            # 레이아웃 컴포넌트
-│   ├── blog/              # 블로그 전용
-│   ├── utility/           # 계산기 전용
+│   ├── dream/             # 꿈 관련 컴포넌트
+│   ├── shared/            # 공유 컴포넌트
 │   └── ui/                # UI 컴포넌트
-├── workers/               # Cloudflare Workers API
-│   ├── api/               # API 엔드포인트
-│   ├── lib/               # 유틸리티
-│   ├── types/             # 타입 정의
-│   ├── schema.sql         # 데이터베이스 스키마
-│   └── index.ts           # 메인 핸들러
 ├── lib/                   # 공유 라이브러리
+│   ├── supabase-client.ts # Supabase 연동
+│   ├── openai-client.ts   # OpenAI 연동
+│   └── api-client.ts      # API 클라이언트
 ├── types/                 # TypeScript 타입
-└── hooks/                 # React 훅
+│   ├── dream.ts           # 꿈 관련 타입
+│   └── content.ts         # 콘텐츠 타입
+└── workers/               # Cloudflare Workers (선택)
 ```
 
 ## 🚀 시작하기
@@ -74,43 +73,40 @@ npm install
 ### 2. 환경 변수 설정
 `.env.local` 파일을 생성하고 다음 변수를 설정하세요:
 ```env
+# Supabase 설정
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# OpenAI API 키
+OPENAI_API_KEY=your-openai-api-key
+
+# Next.js 설정
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-# Cloudflare Workers 환경 변수들 (배포 시 설정)
-# JWT_SECRET=your-jwt-secret
-# GSC_CLIENT_EMAIL=your-service-account-email
-# GSC_PRIVATE_KEY=your-private-key
 ```
 
-### 3. 프론트엔드 개발 서버 실행
+### 3. Supabase 데이터베이스 설정
+1. [Supabase](https://supabase.com)에서 프로젝트 생성
+2. SQL 에디터에서 `docs/DreamScope_PRD.md`의 DB 스키마 실행
+3. 환경 변수에 Supabase URL과 API 키 설정
+
+### 4. 개발 서버 실행
 ```bash
 npm run dev
 ```
 브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인하세요.
 
-### 4. Cloudflare Workers 개발 (선택사항)
-```bash
-# Workers 개발 서버
-npm run cf:dev
-
-# 데이터베이스 마이그레이션
-npm run cf:db:migrate
-
-# 샘플 데이터 시드
-npm run cf:db:seed
-```
-
 ## 🎯 사용 가능한 페이지
 
 ### 일반 사용자
-- **홈페이지**: `/` - 콘텐츠 둘러보기
-- **계산기 상세**: `/utility/[slug]` - 계산기 사용
-- **블로그 상세**: `/blog/[slug]` - 블로그 읽기
-- **가이드 상세**: `/guide/[slug]` - 가이드 보기
+- **홈페이지**: `/` - 꿈 해몽 서비스 소개
+- **꿈 사전**: `/dream` - 꿈 심볼 검색 및 목록
+- **꿈 상세**: `/dream/[slug]` - 개별 꿈 해석
+- **AI 해몽**: `/ai` - AI 기반 꿈 분석
+- **검색**: `/dream?q=검색어` - 꿈 검색 결과
 
-### 관리자
-- **대시보드**: `/admin` - 운영 현황
-- **콘텐츠 관리**: `/admin/content` - CRUD 인터페이스
-- **분석**: `/admin/analytics` - 데이터 분석
+### API 엔드포인트
+- **검색 API**: `/api/search?q=` - 꿈 심볼 검색
+- **AI 해몽 API**: `/api/interpret` - AI 꿈 분석
 
 ## 🔧 주요 스크립트
 
