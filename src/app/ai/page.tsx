@@ -106,10 +106,10 @@ export default function AIInterpretation() {
 
   const addNumber = () => {
     const num = parseInt(numberInput);
-    if (!isNaN(num) && !input.numbers.includes(num)) {
+    if (!isNaN(num) && !(input.numbers || []).includes(num)) {
       setInput(prev => ({
         ...prev,
-        numbers: [...prev.numbers, num]
+        numbers: [...(prev.numbers || []), num]
       }));
       setNumberInput('');
     }
@@ -118,25 +118,25 @@ export default function AIInterpretation() {
   const removeNumber = (number: number) => {
     setInput(prev => ({
       ...prev,
-      numbers: prev.numbers.filter(n => n !== number)
+      numbers: (prev.numbers || []).filter(n => n !== number)
     }));
   };
 
   const toggleEmotion = (emotion: string) => {
     setInput(prev => ({
       ...prev,
-      emotions: prev.emotions.includes(emotion)
-        ? prev.emotions.filter(e => e !== emotion)
-        : [...prev.emotions, emotion]
+      emotions: (prev.emotions || []).includes(emotion)
+        ? (prev.emotions || []).filter(e => e !== emotion)
+        : [...(prev.emotions || []), emotion]
     }));
   };
 
   const toggleColor = (color: string) => {
     setInput(prev => ({
       ...prev,
-      colors: prev.colors.includes(color)
-        ? prev.colors.filter(c => c !== color)
-        : [...prev.colors, color]
+      colors: (prev.colors || []).includes(color)
+        ? (prev.colors || []).filter(c => c !== color)
+        : [...(prev.colors || []), color]
     }));
   };
 
@@ -216,7 +216,7 @@ export default function AIInterpretation() {
                     <Button
                       key={emotion}
                       type="button"
-                      variant={input.emotions.includes(emotion) ? "default" : "outline"}
+                      variant={(input.emotions || []).includes(emotion) ? "default" : "outline"}
                       size="sm"
                       onClick={() => toggleEmotion(emotion)}
                     >
@@ -234,7 +234,7 @@ export default function AIInterpretation() {
                     <Button
                       key={color}
                       type="button"
-                      variant={input.colors.includes(color) ? "default" : "outline"}
+                      variant={(input.colors || []).includes(color) ? "default" : "outline"}
                       size="sm"
                       onClick={() => toggleColor(color)}
                     >
@@ -259,9 +259,9 @@ export default function AIInterpretation() {
                     추가
                   </Button>
                 </div>
-                {input.numbers.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {input.numbers.map((number) => (
+                {(input.numbers || []).length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                    {(input.numbers || []).map((number) => (
                       <Badge key={number} variant="secondary" className="cursor-pointer" onClick={() => removeNumber(number)}>
                         {number} ×
                       </Badge>
