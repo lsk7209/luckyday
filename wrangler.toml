@@ -1,6 +1,6 @@
 # 럭키데이 Cloudflare Configuration
 name = "luckyday-api"
-main = "src/workers/index.ts"
+main = "cloudflare-workers/index.ts"
 compatibility_date = "2024-10-31"
 compatibility_flags = ["nodejs_compat"]
 

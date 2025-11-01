@@ -322,3 +322,13 @@ export default async function BlogPage({ params }: BlogPageProps) {
     </div>
   );
 }
+
+// output: 'export' 모드용 정적 파라미터 생성
+export async function generateStaticParams() {
+  // 실제로는 데이터베이스나 API에서 가져올 예정
+  const slugs = ['salary-negotiation-guide', 'work-life-balance', 'career-development'];
+
+  return slugs.map((slug) => ({
+    slug: slug,
+  }));
+}

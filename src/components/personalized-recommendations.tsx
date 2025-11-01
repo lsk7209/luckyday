@@ -101,6 +101,11 @@ export function PersonalizedRecommendations({
 
   // 추천 알고리즘
   const generateRecommendations = useMemo(() => {
+    // 클라이언트 사이드에서만 localStorage 접근
+    if (typeof window === 'undefined') {
+      return [];
+    }
+
     // 검색 기록 가져오기
     const searchHistory = JSON.parse(localStorage.getItem('dreamscope-search-history') || '[]');
 

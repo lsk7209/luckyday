@@ -3,12 +3,28 @@
  * @description 특정 계산기의 상세 정보와 계산 기능 제공
  */
 import { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ArrowLeft, Star, TrendingUp, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import UtilityCalculator from '@/components/utility/utility-calculator';
+// 클라이언트 사이드에서 로드되는 계산기 컴포넌트
+const UtilityCalculator = dynamic(
+  () => import('@/components/utility/utility-calculator'),
+  {
+    loading: () => (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">계산기를 로딩 중...</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+);
 import { UtilityContent } from '@/types/content';
 
 // 임시 데이터 - 실제로는 API에서 가져올 예정
@@ -167,34 +183,17 @@ interface UtilityPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// SEO 메타데이터 생성
-export async function generateMetadata({ params }: UtilityPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const utility = mockUtilityData[slug];
+// output: 'export' 모드용 정적 파라미터 생성
+export async function generateStaticParams() {
+  // 실제로는 데이터베이스나 API에서 가져올 예정
+  const slugs = ['salary-calculator'];
 
-  if (!utility) {
-    return {
-      title: '계산기를 찾을 수 없습니다',
-    };
-  }
-
-  return {
-    title: utility.seoTitle,
-    description: utility.seoDescription,
-    keywords: utility.tags.join(', '),
-    openGraph: {
-      title: utility.seoTitle,
-      description: utility.seoDescription,
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: utility.seoTitle,
-      description: utility.seoDescription,
-    },
-  };
+  return slugs.map((slug) => ({
+    slug: slug,
+  }));
 }
 
+// SEO 메타데이터는 클라이언트 컴포넌트에서 사용할 수 없으므로 제거됨
 export default async function UtilityPage({ params }: UtilityPageProps) {
   const { slug } = await params;
   const utility = mockUtilityData[slug];
@@ -216,28 +215,6 @@ export default async function UtilityPage({ params }: UtilityPageProps) {
     );
   }
 
-  // 임시 계산 함수 - 실제로는 API 호출
-  const handleCalculate = async (inputs: Record<string, any>) => {
-    // 간단한 연봉 계산 로직 (실제로는 더 복잡한 계산 필요)
-    const { annualSalary, monthlySalary, hourlyWage, workHours = 8, workDays = 22 } = inputs;
-
-    let calculatedAnnualSalary = annualSalary || (monthlySalary * 12) || (hourlyWage * workHours * workDays * 12);
-    let calculatedMonthlySalary = monthlySalary || (calculatedAnnualSalary / 12);
-    let calculatedHourlyWage = hourlyWage || (calculatedMonthlySalary / workDays / workHours);
-
-    // 간단한 세금 계산 (실제로는 누진세 계산 필요)
-    const taxRate = calculatedAnnualSalary > 50000000 ? 0.22 : calculatedAnnualSalary > 30000000 ? 0.15 : 0.08;
-    const estimatedTax = Math.round(calculatedAnnualSalary * taxRate);
-    const takeHomePay = Math.round(calculatedMonthlySalary - (estimatedTax / 12));
-
-    return {
-      calculatedAnnualSalary: Math.round(calculatedAnnualSalary),
-      monthlySalary: Math.round(calculatedMonthlySalary),
-      hourlyWage: Math.round(calculatedHourlyWage),
-      estimatedTax,
-      takeHomePay,
-    };
-  };
 
   return (
     <div className="space-y-8">
@@ -274,7 +251,6 @@ export default async function UtilityPage({ params }: UtilityPageProps) {
             inputs={utility.inputs}
             outputs={utility.outputs}
             formulaKey={utility.formulaKey}
-            onCalculate={handleCalculate}
           />
         </div>
 
@@ -390,3 +366,4 @@ export default async function UtilityPage({ params }: UtilityPageProps) {
     </div>
   );
 }
+

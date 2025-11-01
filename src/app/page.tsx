@@ -12,7 +12,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { PersonalizedRecommendations } from '@/components/personalized-recommendations';
+import dynamic from 'next/dynamic';
+
+// 클라이언트 사이드에서만 로드되는 컴포넌트들
+const PersonalizedRecommendations = dynamic(
+  () => import('@/components/personalized-recommendations').then(mod => ({ default: mod.PersonalizedRecommendations })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 p-6 rounded-xl">
+        <h3 className="text-lg font-semibold mb-4 text-center">맞춤 추천 로딩 중...</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-white dark:bg-gray-800 p-4 rounded-lg animate-pulse">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+);
 import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol } from '@/types/dream';
 

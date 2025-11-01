@@ -220,3 +220,13 @@ export default async function GuidePage({ params }: GuidePageProps) {
     </div>
   );
 }
+
+// output: 'export' 모드용 정적 파라미터 생성
+export async function generateStaticParams() {
+  // 실제로는 데이터베이스나 API에서 가져올 예정
+  const slugs = ['dream-interpretation-basics', 'lucid-dreaming-guide', 'sleep-quality'];
+
+  return slugs.map((slug) => ({
+    slug: slug,
+  }));
+}

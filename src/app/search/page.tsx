@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { searchContent } from '@/lib/api/search';
 import { Content } from '@/types/content';
 
-export default function SearchPage() {
+function SearchPage() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
 
@@ -305,3 +305,21 @@ export default function SearchPage() {
     </div>
   );
 }
+
+// Suspense 래퍼 컴포넌트
+function SearchPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>검색 페이지를 로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <SearchPage />
+    </Suspense>
+  );
+}
+
+export default SearchPageWrapper;

@@ -16,7 +16,7 @@ interface UtilityCalculatorProps {
   inputs: UtilityInput[];
   outputs: UtilityOutput[];
   formulaKey: string;
-  onCalculate: (inputs: Record<string, any>) => Promise<Record<string, any>>;
+  onCalculate?: (inputs: Record<string, any>) => Promise<Record<string, any>>;
 }
 
 /**
@@ -25,6 +25,7 @@ interface UtilityCalculatorProps {
 export default function UtilityCalculator({
   inputs,
   outputs,
+  formulaKey,
   onCalculate,
 }: UtilityCalculatorProps) {
   const [inputValues, setInputValues] = useState<Record<string, any>>({});
@@ -52,7 +53,15 @@ export default function UtilityCalculator({
     setError(null);
 
     try {
-      const calculationResults = await onCalculate(inputValues);
+      let calculationResults: Record<string, any>;
+
+      // onCalculate prop이 제공되면 사용, 그렇지 않으면 기본 계산 로직 사용
+      if (onCalculate) {
+        calculationResults = await onCalculate(inputValues);
+      } else {
+        // 기본 계산 로직 (formulaKey에 따른 계산)
+        calculationResults = performDefaultCalculation(formulaKey, inputValues);
+      }
       setResults(calculationResults);
     } catch (err) {
       setError('계산 중 오류가 발생했습니다. 입력값을 확인해주세요.');
@@ -219,4 +228,30 @@ export default function UtilityCalculator({
       )}
     </div>
   );
+}
+
+// 기본 계산 로직 구현
+function performDefaultCalculation(formulaKey: string, inputs: Record<string, any>): Record<string, any> {
+  switch (formulaKey) {
+    case 'salary-calculator':
+      // 기본 연봉 계산기 로직
+      const baseSalary = inputs.baseSalary || 0;
+      const bonus = inputs.bonus || 0;
+      const taxRate = 0.1; // 10% 세율 (간단한 예시)
+
+      const totalSalary = baseSalary + bonus;
+      const taxAmount = totalSalary * taxRate;
+      const netSalary = totalSalary - taxAmount;
+
+      return {
+        totalSalary,
+        taxAmount,
+        netSalary,
+        taxRate: taxRate * 100
+      };
+
+    default:
+      // 기본 계산 (모든 입력값을 그대로 반환)
+      return inputs;
+  }
 }
