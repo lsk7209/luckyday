@@ -163,6 +163,47 @@ const mockDreamData: Record<string, DreamSymbol> = {
   }
 };
 
+// 꿈별 맞춤 FAQ 생성 함수
+function generateDreamFAQs(dream: DreamSymbol): Array<{ question: string; answer: string }> {
+  const baseFAQs: Array<{ question: string; answer: string }> = [
+    {
+      question: `${dream.name}의 일반적인 의미는 무엇인가요?`,
+      answer: dream.quick_answer
+    },
+    {
+      question: `${dream.name}에서 긍정적 의미는 무엇인가요?`,
+      answer: dream.polarities?.positive 
+        ? `${dream.name}은(는) ${dream.polarities.positive.join(', ')} 등의 긍정적 의미를 가질 수 있습니다.`
+        : `${dream.name}은(는) 상황에 따라 긍정적인 의미를 가질 수 있습니다.`
+    },
+    {
+      question: `${dream.name}에서 주의해야 할 점은 무엇인가요?`,
+      answer: dream.polarities?.caution
+        ? `${dream.name}에서는 ${dream.polarities.caution.join(', ')} 등을 주의해야 할 수 있습니다.`
+        : `${dream.name}의 구체적인 상황과 맥락을 고려하여 해석하는 것이 중요합니다.`
+    },
+    {
+      question: `${dream.name}의 심리학적 의미는 무엇인가요?`,
+      answer: `심리학적으로 ${dream.name}은(는) 무의식의 메시지나 내면의 감정 상태를 반영할 수 있습니다. 구체적인 해석은 꿈의 맥락에 따라 달라질 수 있습니다.`
+    }
+  ];
+
+  // 카테고리별 추가 FAQ
+  if (dream.category === 'animal') {
+    baseFAQs.push({
+      question: `${dream.name}에서 동물의 행동이 의미하는 것은?`,
+      answer: '동물의 행동, 색상, 크기 등이 꿈의 의미를 좌우합니다. 구체적인 상황을 기억하는 것이 중요합니다.'
+    });
+  } else if (dream.category === 'emotion') {
+    baseFAQs.push({
+      question: `${dream.name}과 관련된 감정이 중요한가요?`,
+      answer: '네, 꿈에서 느낀 감정이 해몽의 핵심입니다. 같은 꿈이라도 감정에 따라 의미가 달라질 수 있습니다.'
+    });
+  }
+
+  return baseFAQs;
+}
+
 // SEO 메타데이터 생성
 export async function generateMetadata({ params }: DreamPageProps): Promise<Metadata> {
   const { slug } = await params;
