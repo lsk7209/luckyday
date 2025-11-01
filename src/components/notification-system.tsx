@@ -47,6 +47,11 @@ const NOTIFICATION_CONFIG = {
     color: 'text-yellow-500',
     bgColor: 'bg-yellow-50 dark:bg-yellow-950',
   },
+  error: {
+    icon: AlertTriangle,
+    color: 'text-red-500',
+    bgColor: 'bg-red-50 dark:bg-red-950',
+  },
   dream_update: {
     icon: Sparkles,
     color: 'text-purple-500',
