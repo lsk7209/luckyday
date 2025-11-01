@@ -148,6 +148,18 @@ const mockUtilityData: Record<string, UtilityContent> = {
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-15'),
     tags: ['연봉', '월급', '시급', '세금', '계산기'],
+    jsonLd: {
+      '@type': 'SoftwareApplication',
+      name: '연봉 계산기',
+      description: '연봉, 월급, 시급을 서로 변환하고 세금을 계산하는 정확한 계산기',
+      applicationCategory: 'UtilityApplication',
+      operatingSystem: 'Web',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'KRW',
+      },
+    },
   },
 };
 
