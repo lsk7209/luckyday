@@ -61,7 +61,7 @@ const recentActivityData = [
 ];
 
 // 임시 데이터 - 실제로는 API에서 가져올 예정
-let metrics = {
+const getMetrics = () => ({
   overview: {
     totalUsers: 8750,
     totalSessions: 12400,
@@ -130,10 +130,11 @@ let metrics = {
       ],
     },
   },
-    sitemapLastUpdated: new Date('2024-01-31T08:30:00'),
-  },
+  sitemapLastUpdated: new Date('2024-01-31T08:30:00'),
   recentActivity: recentActivityData,
-};
+});
+
+const metrics = getMetrics();
 
 export default function AdminDashboard() {
   return (
