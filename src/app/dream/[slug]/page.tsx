@@ -332,16 +332,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
               이 꿈 해석이 도움이 되셨나요?
             </div>
             <div className="flex items-center gap-3">
-              <DreamShare
-                dreamName={dream.name}
-                dreamSummary={dream.summary}
-                dreamSlug={dream.slug}
-              />
-              <BookmarkButton
-                dreamSlug={dream.slug}
-                dreamName={dream.name}
-                showText={true}
-              />
+              {/* SSR에서 브라우저 API 사용 컴포넌트 제외 */}
             </div>
           </div>
 
