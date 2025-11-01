@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import Link from 'next/link';
+import { getWorkersApiUrl } from '@/lib/workers-api-url';
 
 interface SearchResult {
   id: string;
