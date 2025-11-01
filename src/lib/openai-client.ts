@@ -68,11 +68,12 @@ export async function interpretDream(input: {
 }
 
 /**
- * 가설 생성 (규칙 기반)
+ * 가설 생성 (규칙 기반, 고도화)
+ * 한국 전통 해몽, 심리학, 상징학을 종합한 가설 생성
  */
 function generateHypotheses(input: any): DreamHypothesis[] {
   const hypotheses: DreamHypothesis[] = [];
-  const { keywords, emotions, colors, scenario } = input;
+  const { keywords, emotions, colors, numbers, relations, scenario, details } = input;
 
   // 뱀 관련 가설
   if (keywords.includes('뱀') || keywords.includes('snake')) {
@@ -147,46 +148,65 @@ function generateHypotheses(input: any): DreamHypothesis[] {
 }
 
 /**
- * OpenAI로 요약문 생성
+ * OpenAI로 요약문 생성 (고도화된 프롬프트)
  */
 async function generateSummary(input: any, hypotheses: DreamHypothesis[]): Promise<string> {
-  const prompt = `너는 해몽 분석가다. 주어진 꿈 입력과 가설을 바탕으로 2-3문장으로 요약하라.
-새로운 상징이나 예언을 생성하지 말고, 주어진 데이터만 근거로 서술하라.
+  const prompt = `당신은 한국의 꿈 해몽 전문가입니다. 전통 해몽, 심리학, 상징학을 종합하여 정확하고 유용한 해몽을 제공합니다.
 
-입력:
-- 키워드: ${input.keywords?.join(', ')}
+## 꿈 정보
+- 주요 키워드: ${input.keywords?.join(', ') || '없음'}
 - 시나리오: ${input.scenario || '없음'}
 - 감정: ${input.emotions?.join(', ') || '없음'}
 - 색상: ${input.colors?.join(', ') || '없음'}
-- 관계: ${input.relations?.map(r => r.role).join(', ') || '없음'}
+- 숫자: ${input.numbers?.join(', ') || '없음'}
+- 관계: ${input.relations?.map(r => `${r.role}${r.name ? '(' + r.name + ')' : ''}`).join(', ') || '없음'}
 - 세부사항: ${input.details || '없음'}
 
-가설:
-${hypotheses.map(h => `- ${h.label} (신뢰도: ${(h.confidence * 100).toFixed(0)}%)`).join('\n')}
+## 분석된 가설
+${hypotheses.map(h => `- ${h.label} (신뢰도: ${(h.confidence * 100).toFixed(0)}%, 증거: ${h.evidence.join(', ')})`).join('\n')}
 
-요약:`;
+## 해몽 작성 지침
+1. 주어진 정보만을 근거로 작성하세요
+2. 새로운 상징이나 예언을 만들지 마세요
+3. 한국 문화와 전통 해몽을 고려하세요
+4. 심리학적 관점을 포함하세요
+5. 긍정적 측면과 주의할 점을 균형있게 제시하세요
+6. 3-4문장으로 명확하고 구체적으로 작성하세요
+7. 일반적이고 모호한 표현보다 구체적인 해석을 제공하세요
+
+## 해몽 작성:`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4-turbo-preview',
       messages: [
         {
           role: 'system',
-          content: '너는 꿈 해몽 전문가다. 주어진 정보만으로 사실적으로 요약하라.'
+          content: `당신은 한국의 꿈 해몽 전문가입니다. 다음 원칙을 따르세요:
+1. 정확성: 주어진 정보만으로 해석하세요
+2. 문화적 맥락: 한국 전통 해몽 문화를 이해하고 반영하세요
+3. 심리학적 근거: 프로이트, 융, 현대 심리학 관점을 고려하세요
+4. 실용성: 사용자가 실제로 활용할 수 있는 구체적 조언을 제공하세요
+5. 균형: 긍정적 측면과 주의할 점을 모두 제시하세요
+6. 존중: 꿈 해몽의 한계를 명시하고 과학적 주장은 하지 마세요`
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      max_tokens: 200,
+      max_tokens: 300,
       temperature: 0.7
     });
 
-    return response.choices[0]?.message?.content?.trim() || '해몽 분석이 어렵습니다.';
+    return response.choices[0]?.message?.content?.trim() || '해몽 분석이 어렵습니다. 좀 더 구체적인 정보를 제공해주시면 더 정확한 해몽을 드릴 수 있습니다.';
   } catch (error) {
     console.error('OpenAI 요약 생성 실패:', error);
-    return '꿈의 의미를 분석하는 중입니다.';
+    // 폴백: 기본 해석 제공
+    const fallbackSummary = hypotheses.length > 0
+      ? `${hypotheses[0].label} 관련 꿈으로 보입니다. ${input.keywords?.join(', ') || '주요 요소'}가 꿈에서 나타났으며, ${input.emotions?.length > 0 ? input.emotions.join(', ') + ' 감정' : '특정 감정'}이 주요 요소입니다. 꿈의 맥락과 현재 생활 상황을 함께 고려해보세요.`
+      : '꿈의 의미를 분석하는 중입니다.';
+    return fallbackSummary;
   }
 }
 

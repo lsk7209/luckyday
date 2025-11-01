@@ -24,10 +24,12 @@ export default function MainLayout({
   className = '',
 }: MainLayoutProps) {
   return (
-    <div className={`min-h-screen flex flex-col ${className}`}>
+    <div className={`min-h-screen flex flex-col w-full ${className}`}>
       <Header />
-      <main className="flex-1">
-        {children}
+      <main className="flex-1 w-full">
+        <div className="w-full">
+          {children}
+        </div>
       </main>
       {showFooter && <Footer />}
     </div>

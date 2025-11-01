@@ -1,6 +1,6 @@
 {
-  "name": "DreamScope - AI 꿈 해몽",
-  "short_name": "DreamScope",
+  "name": "럭키데이 - AI 꿈 해몽",
+  "short_name": "럭키데이",
   "description": "AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读",
   "start_url": "/",
   "display": "standalone",
@@ -24,14 +24,14 @@
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "DreamScope 모바일 화면"
+      "label": "럭키데이 모바일 화면"
     },
     {
       "src": "/screenshot-desktop.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "DreamScope 데스크톱 화면"
+      "label": "럭키데이 데스크톱 화면"
     }
   ],
   "shortcuts": [

@@ -4,7 +4,7 @@ import "./globals.css";
 import MainLayout from "@/components/layout/main-layout";
 import { Providers } from "@/lib/providers";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { PWAInstallPrompt } from "@/components/pwa";
+// import { PWAInstallPrompt } from "@/components/pwa"; // 앱 설치 메시지 제거
 
 const inter = Inter({
   variable: "--font-inter",
@@ -14,45 +14,45 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "DreamScope - AI 꿈 해몽",
-    template: "%s | DreamScope"
+    default: "럭키데이 - AI 꿈 해몽",
+    template: "%s | 럭키데이"
   },
   description: "AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读. 5,000개 이상의 꿈 사전과 개인 맞춤 AI 분석으로 당신의 꿈을 정확하게 해석합니다.",
   keywords: ["꿈해몽", "꿈풀이", "AI해몽", "심리학", "상징학", "꿈사전", "꿈해석", "꿈분석"],
-  authors: [{ name: "DreamScope Team" }],
-  creator: "DreamScope",
-  publisher: "DreamScope",
+  authors: [{ name: "럭키데이" }],
+  creator: "럭키데이",
+  publisher: "럭키데이",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://dreamscope.app'),
+  metadataBase: new URL('https://luckyday.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: 'https://dreamscope.app',
-    title: 'DreamScope - AI 꿈 해몽',
+    url: 'https://luckyday.app',
+    title: '럭키데이 - AI 꿈 해몽',
     description: 'AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读',
-    siteName: 'DreamScope',
+    siteName: '럭키데이',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'DreamScope - AI 꿈 해몽',
+        alt: '럭키데이 - AI 꿈 해몽',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DreamScope - AI 꿈 해몽',
+    title: '럭키데이 - AI 꿈 해몽',
     description: 'AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读',
     images: ['/og-image.png'],
-    creator: '@dreamscope_app',
+    creator: '@luckyday_app',
   },
   robots: {
     index: true,
@@ -79,14 +79,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'DreamScope',
+    title: '럭키데이',
   },
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'DreamScope',
-    'application-name': 'DreamScope',
+    'apple-mobile-web-app-title': '럭키데이',
+    'application-name': '럭키데이',
     'msapplication-TileColor': '#000000',
     'msapplication-config': '/browserconfig.xml',
   },
@@ -129,7 +129,7 @@ export default function RootLayout({
             <MainLayout>
               {children}
             </MainLayout>
-            <PWAInstallPrompt />
+            {/* <PWAInstallPrompt /> 앱 설치 메시지 제거 */}
           </Providers>
         </ErrorBoundary>
       </body>

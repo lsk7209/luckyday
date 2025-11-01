@@ -1,6 +1,6 @@
 /**
  * Footer 컴포넌트
- * @description DreamScope 사이트 푸터 및 링크 모음
+ * @description 럭키데이 사이트 푸터 및 링크 모음
  */
 import Link from 'next/link';
 import { Moon, Brain, BookOpen, FileText, Search, Github, Twitter, Mail } from 'lucide-react';
@@ -35,7 +35,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Moon className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">DreamScope</span>
+              <span className="font-bold text-lg">럭키데이</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs">
               AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读
@@ -83,7 +83,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} DreamScope. All rights reserved.
+              © {currentYear} 럭키데이. All rights reserved.
             </p>
             <div className="flex items-center space-x-4 text-sm text-muted-foreground">
               <span>Powered by Next.js & Cloudflare</span>

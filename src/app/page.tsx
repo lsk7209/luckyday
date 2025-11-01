@@ -1,5 +1,5 @@
 /**
- * DreamScope 홈페이지
+ * 럭키데이 홈페이지
  * @description 꿈 해몽 사이트 메인 페이지 - 검색, 인기 키워드, AI 해몽 CTA
  */
 'use client';
@@ -49,49 +49,49 @@ export default function Home() {
   ];
 
   return (
-    <div className="space-y-8 md:space-y-12 py-6 md:py-8">
+    <div className="w-full space-y-12 md:space-y-16 lg:space-y-20 py-8 md:py-12 lg:py-16">
       {/* Hero Section */}
-      <section className="text-center space-y-4 md:space-y-6 py-8 md:py-12 px-4">
+      <section className="w-full section-container text-center space-y-6 md:space-y-8 py-12 md:py-16 lg:py-20">
         <div className="flex items-center justify-center space-x-2 text-primary mb-2 md:mb-4">
           <Moon className="h-6 w-6 md:h-8 md:w-8" />
           <Sparkles className="h-5 w-5 md:h-6 md:w-6" />
         </div>
 
-        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-tight">
           꿈의 의미를
           <br className="md:hidden" />
           <span className="hidden md:inline"> </span>
-          <span className="text-primary">AI와 함께</span> 풀어보세요
+          <span className="text-primary bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">AI와 함께</span> 풀어보세요
         </h1>
 
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-2">
+        <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light">
           심리학, 문화, 상징학을 바탕으로 한 정확한 꿈 해몽.
           <br className="hidden sm:inline" />
           5,000개 이상의 꿈 사전과 AI 분석으로 당신의 꿈을解读합니다.
         </p>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="max-w-md mx-auto relative w-full px-4">
-          <Search className="absolute left-7 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <form onSubmit={handleSearch} className="max-w-2xl mx-auto relative w-full">
+          <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             placeholder="꿈에 나온 것을 검색하세요..."
-            className="pl-10 h-12 md:h-14 text-base md:text-lg w-full"
+            className="pl-14 h-14 md:h-16 text-lg md:text-xl rounded-full border-2 shadow-lg focus:shadow-xl transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </form>
 
-        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
-          <Button size="lg" className="w-full sm:w-auto" asChild>
+        <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center">
+          <Button size="lg" className="w-full sm:w-auto text-base md:text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all" asChild>
             <Link href="/ai">
-              <Brain className="mr-2 h-5 w-5" />
+              <Brain className="mr-2 h-5 w-5 md:h-6 md:w-6" />
               AI 해몽하기
             </Link>
           </Button>
-          <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
+          <Button variant="outline" size="lg" className="w-full sm:w-auto text-base md:text-lg px-8 py-6 rounded-full border-2 hover:border-primary/50 transition-all" asChild>
             <Link href="/dream">
-              <BookOpen className="mr-2 h-5 w-5" />
+              <BookOpen className="mr-2 h-5 w-5 md:h-6 md:w-6" />
               꿈 사전 보기
             </Link>
           </Button>
@@ -99,19 +99,19 @@ export default function Home() {
       </section>
 
       {/* Popular Keywords */}
-      <section className="space-y-4 md:space-y-6 px-4">
-        <div className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-2">인기 꿈 키워드</h2>
-          <p className="text-sm md:text-base text-muted-foreground">많이 검색되는 꿈들의 의미를 확인하세요</p>
+      <section className="w-full section-container space-y-8 md:space-y-12">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">인기 꿈 키워드</h2>
+          <p className="text-base md:text-lg text-muted-foreground">많이 검색되는 꿈들의 의미를 확인하세요</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 md:gap-6 max-w-7xl mx-auto">
           {popularKeywords.map((keyword) => (
             <Link key={keyword.slug} href={`/dream/${keyword.slug}`}>
-              <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer h-full">
-                <CardContent className="p-3 md:p-4 text-center flex flex-col items-center justify-center min-h-[80px] md:min-h-[100px]">
-                  <div className="text-xl md:text-2xl mb-1 md:mb-2">{keyword.icon}</div>
-                  <h3 className="font-medium text-xs md:text-sm leading-tight">{keyword.name}</h3>
+              <Card className="hover:shadow-xl hover:shadow-primary/10 transition-all hover:scale-105 cursor-pointer h-full border-2 hover:border-primary/20 group">
+                <CardContent className="p-4 md:p-6 text-center flex flex-col items-center justify-center min-h-[100px] md:min-h-[120px]">
+                  <div className="text-3xl md:text-4xl mb-2 md:mb-3 group-hover:scale-110 transition-transform">{keyword.icon}</div>
+                  <h3 className="font-semibold text-sm md:text-base leading-tight group-hover:text-primary transition-colors">{keyword.name}</h3>
                 </CardContent>
               </Card>
             </Link>
@@ -120,16 +120,16 @@ export default function Home() {
       </section>
 
       {/* Popular Dreams */}
-      <section className="space-y-4 md:space-y-6 px-4">
+      <section className="w-full section-container space-y-8 md:space-y-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-2xl md:text-3xl font-bold">인기 꿈 해몽</h2>
-          <Button variant="ghost" size="sm" className="self-start sm:self-auto" asChild>
-            <Link href="/dream">전체 보기</Link>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">인기 꿈 해몽</h2>
+          <Button variant="ghost" size="lg" className="self-start sm:self-auto text-base" asChild>
+            <Link href="/dream">전체 보기 →</Link>
           </Button>
         </div>
 
         {dreamsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader>
@@ -144,34 +144,34 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
             {popularDreams && popularDreams.length > 0 ? popularDreams.map((dream: DreamSymbol) => (
-              <Card key={dream.slug} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-xs">
+              <Card key={dream.slug} className="hover:shadow-xl hover:shadow-primary/5 transition-all hover:-translate-y-1 border hover:border-primary/10 group h-full flex flex-col">
+                <CardHeader className="flex-grow">
+                  <div className="flex items-center justify-between mb-3">
+                    <Badge variant="secondary" className="text-xs font-medium">
                       {dream.category}
                     </Badge>
                     <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                       <TrendingUp className="h-4 w-4" />
-                      <span>{dream.popularity}</span>
+                      <span className="font-semibold">{dream.popularity}</span>
                     </div>
                   </div>
-                  <CardTitle className="line-clamp-2">{dream.name}</CardTitle>
-                  <CardDescription className="line-clamp-2">
+                  <CardTitle className="line-clamp-2 text-lg group-hover:text-primary transition-colors">{dream.name}</CardTitle>
+                  <CardDescription className="line-clamp-2 mt-2">
                     {dream.summary}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-1 mb-4">
+                <CardContent className="flex flex-col flex-grow justify-end">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {dream.tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
+                      <Badge key={tag} variant="outline" className="text-xs font-normal">
                         {tag}
                       </Badge>
                     ))}
                   </div>
-                  <Button size="sm" className="w-full" asChild>
-                    <Link href={`/dream/${dream.slug}`}>해몽 보기</Link>
+                  <Button size="default" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors" asChild>
+                    <Link href={`/dream/${dream.slug}`}>해몽 보기 →</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -189,18 +189,21 @@ export default function Home() {
       </section>
 
       {/* Personalized Recommendations */}
-      <section className="py-12">
+      <section className="w-full section-container py-12 md:py-16">
         <PersonalizedRecommendations limit={4} />
       </section>
 
       {/* AI Features */}
-      <section className="bg-muted rounded-lg p-8 text-center space-y-6">
-        <div className="flex items-center justify-center space-x-2">
-          <Brain className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold">AI 해몽의 장점</h2>
-        </div>
+      <section className="w-full section-container">
+        <div className="bg-gradient-to-br from-muted/50 via-muted/30 to-background rounded-2xl lg:rounded-3xl p-8 md:p-12 lg:p-16 text-center space-y-8 md:space-y-12 border border-border/50 shadow-xl">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Brain className="h-8 w-8 md:h-10 md:w-10 text-primary" />
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">AI 해몽의 장점</h2>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 text-left max-w-6xl mx-auto">
           <div className="space-y-2">
             <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
               <Sparkles className="h-6 w-6 text-primary" />
@@ -232,22 +235,25 @@ export default function Home() {
           </div>
         </div>
 
-        <Button size="lg" asChild>
+        <Button size="lg" className="text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all" asChild>
           <Link href="/ai">
-            <Brain className="mr-2 h-5 w-5" />
+            <Brain className="mr-2 h-6 w-6" />
             지금 AI 해몽 시작하기
           </Link>
         </Button>
+        </div>
       </section>
 
       {/* Disclaimer */}
-      <section className="text-center text-sm text-muted-foreground space-y-2">
-        <p>
-          💡 이 사이트는 꿈 해석 정보를 제공하며, 의학적·법률적 조언이 아닙니다.
-        </p>
-        <p>
-          꿈 해몽은 참고용으로만 사용하시고, 중요한 결정은 전문가와 상담하세요.
-        </p>
+      <section className="w-full section-container text-center text-sm md:text-base text-muted-foreground space-y-3 py-8">
+        <div className="max-w-3xl mx-auto bg-muted/30 rounded-xl p-6 space-y-2">
+          <p className="font-medium">
+            💡 이 사이트는 꿈 해석 정보를 제공하며, 의학적·법률적 조언이 아닙니다.
+          </p>
+          <p>
+            꿈 해몽은 참고용으로만 사용하시고, 중요한 결정은 전문가와 상담하세요.
+          </p>
+        </div>
       </section>
     </div>
   );

@@ -45,6 +45,24 @@ export const cronJobs: CronJob[] = [
     handler: handleContentRefreshQueue,
     enabled: true,
   },
+  {
+    name: 'dream-popularity-update',
+    schedule: '30 3 * * *', // 매일 오전 3시 30분
+    handler: handleDreamPopularityUpdate,
+    enabled: true,
+  },
+  {
+    name: 'dream-relation-rebuild',
+    schedule: '0 4 * * *', // 매일 오전 4시
+    handler: handleDreamRelationRebuild,
+    enabled: true,
+  },
+  {
+    name: 'search-log-cleanup',
+    schedule: '0 5 * * 0', // 매주 일요일 오전 5시
+    handler: handleSearchLogCleanup,
+    enabled: true,
+  },
 ];
 
 // 메인 Cron 핸들러
@@ -87,7 +105,7 @@ function matchesCronPattern(pattern: string, cronTime: string): boolean {
   return true; // 모든 패턴에 대해 true 반환 (실제 구현 필요)
 }
 
-// 사이트맵 갱신 작업
+// 사이트맵 갱신 작업 (꿈 해몽 포함)
 async function handleSitemapRefresh(env: Env) {
   console.log('🔄 Refreshing sitemaps...');
 
@@ -99,6 +117,9 @@ async function handleSitemapRefresh(env: Env) {
       await generateSitemap(env, type);
     }
 
+    // 꿈 해몽 사이트맵 생성
+    await generateDreamSitemap(env);
+
     // 메인 사이트맵 갱신
     await generateMainSitemap(env);
 
@@ -107,6 +128,29 @@ async function handleSitemapRefresh(env: Env) {
     console.error('❌ Sitemap refresh failed:', error);
     throw error;
   }
+}
+
+// 꿈 해몽 사이트맵 생성
+async function generateDreamSitemap(env: Env) {
+  const dreams = await env.DB.prepare(`
+    SELECT slug, last_updated FROM dream_symbol
+    ORDER BY popularity DESC
+  `).all<{ slug: string; last_updated: string }>();
+
+  const urls = (dreams.results || []).map(dream => ({
+    loc: `https://luckyday.pages.dev/dream/${dream.slug}`,
+    lastmod: dream.last_updated,
+    changefreq: 'weekly',
+    priority: '0.8',
+  }));
+
+  // XML 생성 및 R2에 저장
+  const sitemapXml = generateSitemapXml(urls);
+  await env.STORAGE.put('sitemaps/dreams.xml', sitemapXml, {
+    httpMetadata: {
+      contentType: 'application/xml',
+    },
+  });
 }
 
 // 색인 제출 작업
@@ -361,6 +405,115 @@ function generateSitemapIndexXml(sitemaps: string[]): string {
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${sitemapElements}
 </sitemapindex>`;
+}
+
+// 꿈 인기도 업데이트 작업
+async function handleDreamPopularityUpdate(env: Env) {
+  console.log('🔄 Updating dream popularity...');
+
+  try {
+    // 최근 검색 로그를 기반으로 인기도 업데이트
+    const searchLogs = await env.DB.prepare(`
+      SELECT q, COUNT(*) as count
+      FROM search_log
+      WHERE ts >= datetime('now', '-7 days')
+      GROUP BY q
+      ORDER BY count DESC
+    `).all<{ q: string; count: number }>();
+
+    for (const log of searchLogs.results || []) {
+      // 검색어가 포함된 꿈들의 인기도 증가
+      await env.DB.prepare(`
+        UPDATE dream_symbol
+        SET popularity = popularity + ?
+        WHERE name LIKE ? OR summary LIKE ? OR tags LIKE ?
+      `).bind(
+        Math.min(log.count * 5, 100), // 최대 100점 증가
+        `%${log.q}%`,
+        `%${log.q}%`,
+        `%${log.q}%`
+      ).run();
+    }
+
+    console.log(`✅ Updated popularity for ${searchLogs.results?.length || 0} dreams`);
+  } catch (error) {
+    console.error('❌ Dream popularity update failed:', error);
+    throw error;
+  }
+}
+
+// 꿈 관계 그래프 재계산 작업
+async function handleDreamRelationRebuild(env: Env) {
+  console.log('🔄 Rebuilding dream relations...');
+
+  try {
+    // 기존 관계 삭제 (선택사항 - 완전 재구축 시)
+    // await env.DB.prepare('DELETE FROM dream_relation').run();
+
+    // 꿈 심볼들을 모두 조회
+    const dreams = await env.DB.prepare('SELECT slug, category, tags FROM dream_symbol').all<{
+      slug: string;
+      category: string;
+      tags: string;
+    }>();
+
+    const relations: Array<{ from: string; to: string; weight: number }> = [];
+
+    for (const dream of dreams.results || []) {
+      const tags = JSON.parse(dream.tags || '[]') as string[];
+
+      // 같은 카테고리의 다른 꿈들과 관계 생성
+      const relatedDreams = (dreams.results || []).filter(d =>
+        d.slug !== dream.slug && (
+          d.category === dream.category ||
+          (JSON.parse(d.tags || '[]') as string[]).some(tag => tags.includes(tag))
+        )
+      );
+
+      for (const related of relatedDreams.slice(0, 5)) {
+        const relatedTags = JSON.parse(related.tags || '[]') as string[];
+        const commonTags = tags.filter(t => relatedTags.includes(t));
+        const weight = 0.3 + (commonTags.length * 0.15) + (related.category === dream.category ? 0.2 : 0);
+
+        relations.push({
+          from: dream.slug,
+          to: related.slug,
+          weight: Math.min(weight, 1.0)
+        });
+      }
+    }
+
+    // 관계 저장 (INSERT OR REPLACE)
+    for (const rel of relations) {
+      await env.DB.prepare(`
+        INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight)
+        VALUES (?, ?, ?)
+      `).bind(rel.from, rel.to, rel.weight).run();
+    }
+
+    console.log(`✅ Rebuilt ${relations.length} dream relations`);
+  } catch (error) {
+    console.error('❌ Dream relation rebuild failed:', error);
+    throw error;
+  }
+}
+
+// 검색 로그 정리 작업
+async function handleSearchLogCleanup(env: Env) {
+  console.log('🔄 Cleaning up search logs...');
+
+  try {
+    // 90일 이상 된 검색 로그 삭제
+    const result = await env.DB.prepare(`
+      DELETE FROM search_log
+      WHERE ts < datetime('now', '-90 days')
+    `).run();
+
+    console.log(`✅ Cleaned up ${result.meta.changes || 0} old search logs`);
+  } catch (error) {
+    console.error('❌ Search log cleanup failed:', error);
+    throw error;
+  }
 }
 
 // 기타 헬퍼 함수들은 생략...

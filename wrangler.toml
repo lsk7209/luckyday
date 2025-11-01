@@ -1,34 +1,42 @@
-# DreamScope Cloudflare Configuration
-name = "dreamscope-api"
+# 럭키데이 Cloudflare Configuration
+name = "luckyday-api"
 main = "src/workers/index.ts"
 compatibility_date = "2024-10-31"
 compatibility_flags = ["nodejs_compat"]
 
 # =================================================================
-# 데이터베이스 설정
+# 데이터베이스 설정 (Cloudflare D1)
 # =================================================================
+
+# D1 데이터베이스 (꿈 해몽 데이터 저장)
+[[d1_databases]]
+binding = "DB"
+database_name = "luckyday-db"
+database_id = "8cb24e3c-6cfe-4874-a2a9-ea4f03d627f2"
 
 # KV Namespace for caching (검색 결과, 꿈 데이터 캐싱)
 [[kv_namespaces]]
 binding = "CACHE"
-id = "dreamscope-cache"
-preview_id = "dreamscope-cache-preview"
+id = "luckyday-cache"
+preview_id = "luckyday-cache-preview"
 
 # =================================================================
-# 크론 트리거 설정 (DreamScope 자동화)
+# 크론 트리거 설정 (럭키데이 자동화)
 # =================================================================
 
-[triggers.crons]
-# 사이트맵 자동 생성 (매일 오전 3시 10분)
-sitemap_generate = "10 3 * * *"
-# IndexNow 자동 전송 (매일 오전 3시 20분)
-indexnow_submit = "20 3 * * *"
-# 인기 검색어 집계 (매일 오전 3시 30분)
-popularity_update = "30 3 * * *"
-# 꿈 관계 그래프 재계산 (매일 오전 4시)
-relation_rebuild = "0 4 * * *"
-# 검색 로그 정리 (매주 일요일 오전 5시)
-log_cleanup = "0 5 * * 0"
+[triggers]
+crons = [
+  # 사이트맵 자동 생성 (매일 오전 3시 10분)
+  { cron = "10 3 * * *" },
+  # IndexNow 자동 전송 (매일 오전 3시 20분)
+  { cron = "20 3 * * *" },
+  # 꿈 인기도 업데이트 (매일 오전 3시 30분)
+  { cron = "30 3 * * *" },
+  # 꿈 관계 그래프 재계산 (매일 오전 4시)
+  { cron = "0 4 * * *" },
+  # 검색 로그 정리 (매주 일요일 오전 5시)
+  { cron = "0 5 * * 0" },
+]
 
 # =================================================================
 # 환경 변수 설정
@@ -42,9 +50,9 @@ OPENAI_API_KEY = "your-openai-api-key"
 OPENAI_MODEL = "gpt-3.5-turbo"
 OPENAI_MAX_TOKENS = "1000"
 
-# Supabase 연결 (필수)
-SUPABASE_URL = "your-supabase-url"
-SUPABASE_SERVICE_KEY = "your-supabase-service-key"
+# OpenAI API 키만 사용 (Supabase 제거, Cloudflare D1 사용)
+# SUPABASE_URL = "your-supabase-url"  # 제거됨
+# SUPABASE_SERVICE_KEY = "your-supabase-service-key"  # 제거됨
 
 # 검색 설정
 SEARCH_CACHE_TTL = "3600"  # 1시간
@@ -61,18 +69,8 @@ RATE_LIMIT_WINDOW = "60"     # 윈도우 (초)
 # =================================================================
 # CORS 설정
 # =================================================================
-
-[cors]
-allowed_origins = [
-  "http://localhost:3000",
-  "http://localhost:8788",  # Cloudflare dev server
-  "https://dreamscope.pages.dev",
-  "https://your-domain.com"  # 실제 도메인으로 변경 필요
-]
-allow_credentials = true
-allow_headers = ["Authorization", "Content-Type", "X-Requested-With", "X-API-Key"]
-allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"]
-max_age = 86400
+# 주의: CORS는 Workers 코드에서 처리합니다 (src/workers/lib/cors.ts)
+# allowed_origins는 환경 변수나 코드에서 관리합니다
 
 # =================================================================
 # 보안 헤더 (Cloudflare Pages에서 처리)

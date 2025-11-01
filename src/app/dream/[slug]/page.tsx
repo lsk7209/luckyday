@@ -14,6 +14,7 @@ import RelatedList from '@/components/shared/related-list';
 import AdSlot from '@/components/shared/ad-slot';
 import { BookmarkButton } from '@/components/bookmark';
 import { DreamShare } from '@/components/social-share';
+import MDXRenderer from '@/components/dream/mdx-renderer';
 import { dreamDb } from '@/lib/supabase-client';
 import { DreamSymbol, DreamPageProps } from '@/types/dream';
 
@@ -211,21 +212,8 @@ export default async function DreamPage({ params }: DreamPageProps) {
     );
   }
 
-  // 임시 FAQ 데이터
-  const faqs = [
-    {
-      question: `${dream.name}은 나쁜 꿈인가요?`,
-      answer: `꿈의 의미는 맥락에 따라 다릅니다. ${dream.quick_answer.split('.')[0]}. 중요한 것은 꿈속 감정과 주변 상황입니다.`
-    },
-    {
-      question: '이 꿈을 자주 꾸면 어떻게 해야 하나요?',
-      answer: '반복되는 꿈은 무의식의 메시지일 수 있습니다. 일기를 쓰거나 전문가와 상담하는 것을 고려해보세요.'
-    },
-    {
-      question: '꿈 해몽은 과학적인가요?',
-      answer: '꿈 해몽은 심리학적 상징 해석입니다. 과학적 증거라기보다는 문화적·심리적 참고자료로 활용하세요.'
-    }
-  ];
+  // 상세 FAQ 데이터 (꿈별 맞춤)
+  const faqs = generateDreamFAQs(dream);
 
   // 임시 관련 꿈 데이터
   const relatedDreams = [
@@ -330,26 +318,10 @@ export default async function DreamPage({ params }: DreamPageProps) {
         {/* 본문 */}
         <div className="lg:col-span-2 order-1 lg:order-2">
           <Card>
-            <CardContent className="p-8">
-              <article className="prose prose-lg max-w-none dark:prose-invert">
-                {/* MDX 콘텐츠를 HTML로 변환하는 로직 */}
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: dream.body_mdx
-                      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                      .replace(/^\* (.*$)/gim, '<li>$1</li>')
-                      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-                      .replace(/\*(.*)\*/gim, '<em>$1</em>')
-                      .replace(/\n\n/gim, '</p><p>')
-                      .replace(/\n/gim, '<br>')
-                      .replace(/^/, '<p>')
-                      .replace(/$/, '</p>')
-                      .replace(/<p><\/p>/g, '')
-                      .replace(/<p>(<h[1-6]>.*<\/h[1-6]>)<\/p>/g, '$1')
-                      .replace(/\| (.*?) \| (.*?) \|/g, '<table><tr><td>$1</td><td>$2</td></tr></table>')
-                  }}
-                />
+            <CardContent className="p-6 md:p-8 lg:p-10">
+              <article className="max-w-none">
+                {/* 고도화된 MDX 렌더러 사용 */}
+                <MDXRenderer content={dream.body_mdx} />
               </article>
             </CardContent>
           </Card>

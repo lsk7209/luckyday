@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { useBookmarks } from '@/components/bookmark';
 import { ThemeToggleSimple } from '@/components/theme-toggle';
 import { NotificationSystem } from '@/components/notification-system';
-import { LanguageToggle } from '@/components/language-selector';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,7 +39,7 @@ export default function Header() {
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center space-x-2">
             <Moon className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">DreamScope</span>
+            <span className="font-bold text-xl">럭키데이</span>
           </Link>
         </div>
 
@@ -67,9 +66,6 @@ export default function Header() {
         <div className="flex items-center space-x-4">
           {/* Notifications */}
           <NotificationSystem />
-
-          {/* Language Toggle */}
-          <LanguageToggle />
 
           {/* Theme Toggle */}
           <ThemeToggleSimple />
