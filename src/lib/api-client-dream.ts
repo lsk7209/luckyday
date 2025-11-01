@@ -29,6 +29,18 @@ export interface SearchResult {
   query: string;
 }
 
+// Workers API 응답 타입 변환 헬퍼
+// D1에서 받은 데이터(id: number)를 DreamSymbol(id: string)로 변환
+function convertDreamSymbol(data: any): DreamSymbol {
+  return {
+    ...data,
+    id: String(data.id || data.slug), // number를 string으로 변환
+    tags: Array.isArray(data.tags) ? data.tags : (typeof data.tags === 'string' ? JSON.parse(data.tags) : []),
+    polarities: typeof data.polarities === 'string' ? JSON.parse(data.polarities || '{}') : (data.polarities || {}),
+    modifiers: typeof data.modifiers === 'string' ? JSON.parse(data.modifiers || '{}') : (data.modifiers || {}),
+  };
+}
+
 /**
  * Cloudflare Workers API를 통한 꿈 데이터베이스 클라이언트
  */
