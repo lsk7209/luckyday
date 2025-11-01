@@ -47,9 +47,34 @@ export default function DreamDictionary() {
     enabled: !isSearchMode,
   });
 
-  const handleAdvancedSearch = (query: string, results: DreamSymbol[]) => {
-    setSearchResults(results);
-    setIsSearchMode(results.length > 0);
+  // AdvancedSearch에서 받은 SearchResult[]를 DreamSymbol[]로 변환
+  const handleAdvancedSearch = (query: string, results: Array<{
+    id: string;
+    slug: string;
+    name: string;
+    summary: string;
+    category: string;
+    popularity: number;
+    tags: string[];
+    searchScore?: number;
+  }>) => {
+    // SearchResult를 DreamSymbol로 변환 (필요한 필드만 포함)
+    const dreamSymbols: DreamSymbol[] = results.map(result => ({
+      id: result.id,
+      slug: result.slug,
+      name: result.name,
+      category: result.category,
+      summary: result.summary,
+      quick_answer: result.summary, // summary를 quick_answer로 사용
+      body_mdx: '', // 검색 결과에는 MDX가 없을 수 있음
+      tags: result.tags,
+      popularity: result.popularity,
+      polarities: {}, // 기본값
+      modifiers: {}, // 기본값
+      last_updated: new Date().toISOString(), // 기본값
+    }));
+    setSearchResults(dreamSymbols);
+    setIsSearchMode(dreamSymbols.length > 0);
     setPage(1);
   };
 
