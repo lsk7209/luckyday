@@ -5,25 +5,14 @@
  * Frontend에서 Cloudflare Workers API를 호출하여 D1 데이터베이스에 접근
  */
 
+import { DreamSymbol as DreamSymbolType } from '@/types/dream';
+
 const WORKERS_API_URL = process.env.NEXT_PUBLIC_WORKERS_API_URL || 
   process.env.NEXT_PUBLIC_SITE_URL?.replace('pages.dev', 'workers.dev') || 
   'https://luckyday-api.workers.dev';
 
-export interface DreamSymbol {
-  id: number;
-  slug: string;
-  name: string;
-  category: string;
-  summary: string;
-  quick_answer: string;
-  body_mdx: string;
-  tags: string[];
-  popularity: number;
-  polarities: Record<string, any>;
-  modifiers: Record<string, any>;
-  last_updated: string;
-  created_at: string;
-}
+// 공통 타입 재export
+export type DreamSymbol = DreamSymbolType;
 
 export interface DreamSymbolListParams {
   category?: string;
@@ -55,7 +44,7 @@ export const workersDreamDb = {
         throw new Error(`Failed to fetch dream: ${response.statusText}`);
       }
       const data = await response.json();
-      return data.success ? data.dream : null;
+      return data.success ? convertDreamSymbol(data.dream) : null;
     } catch (error) {
       console.error('[Workers API] 꿈 심볼 조회 실패:', error);
       return null;
@@ -78,7 +67,8 @@ export const workersDreamDb = {
         throw new Error(`Failed to fetch dreams: ${response.statusText}`);
       }
       const data = await response.json();
-      return data.success ? (data.dreams || []) : [];
+      const dreams = data.success ? (data.dreams || []) : [];
+      return dreams.map(convertDreamSymbol);
     } catch (error) {
       console.error('[Workers API] 꿈 심볼 목록 조회 실패:', error);
       return [];
@@ -97,8 +87,8 @@ export const workersDreamDb = {
       const data = await response.json();
       return {
         success: data.success || false,
-        results: data.results || [],
-        recommendations: data.recommendations || [],
+        results: (data.results || []).map(convertDreamSymbol),
+        recommendations: (data.recommendations || []).map(convertDreamSymbol),
         total: data.total || 0,
         query: data.query || query
       };
@@ -147,7 +137,8 @@ export const workersDreamDb = {
         throw new Error(`Failed to fetch popular dreams: ${response.statusText}`);
       }
       const data = await response.json();
-      return data.success ? (data.dreams || []) : [];
+      const dreams = data.success ? (data.dreams || []) : [];
+      return dreams.map(convertDreamSymbol);
     } catch (error) {
       console.error('[Workers API] 인기 꿈 조회 실패:', error);
       return [];
