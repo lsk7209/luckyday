@@ -42,6 +42,57 @@ export default function DreamDictionary() {
   const [isSearchMode, setIsSearchMode] = useState(false);
   const pageSize = 20;
 
+  // 콘텐츠 렌더링 함수
+  const renderDreamContent = () => {
+    if (isLoadingData) {
+      return (
+        <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+                <div className="h-3 bg-muted rounded w-1/2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-3 bg-muted rounded mb-2"></div>
+                <div className="h-3 bg-muted rounded w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-red-500">데이터를 불러오는 중 오류가 발생했습니다.</p>
+        </div>
+      );
+    }
+
+    if (displayDreams && displayDreams.length > 0) {
+      return (
+        <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+          {displayDreams.map((dream: DreamSymbol) => (
+            <DreamCard key={dream.slug} dream={dream} />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="text-center py-12">
+        <div className="text-muted-foreground mb-4">
+          {searchQuery ? '검색 결과가 없습니다.' : '등록된 꿈 심볼이 없습니다.'}
+        </div>
+        {searchQuery && (
+          <Button onClick={clearSearch}>전체 목록 보기</Button>
+        )}
+      </div>
+    );
+  };
+
   // 꿈 심볼 목록 조회 (검색 모드가 아닐 때만)
   const { data: dreams, isLoading, error } = useQuery({
     queryKey: ['dream-symbols', selectedCategory, sortBy, page],
