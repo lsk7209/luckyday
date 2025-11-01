@@ -12,8 +12,8 @@ import TableOfContents from '@/components/shared/table-of-contents';
 import FAQAccordion from '@/components/shared/faq-accordion';
 import RelatedList from '@/components/shared/related-list';
 import AdSlot from '@/components/shared/ad-slot';
-import { BookmarkButton } from '@/components/bookmark';
-import { DreamShare } from '@/components/social-share';
+// import { BookmarkButton } from '@/components/bookmark';
+// import { DreamShare } from '@/components/social-share';
 import MDXRenderer from '@/components/dream/mdx-renderer';
 import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol, DreamPageProps } from '@/types/dream';
@@ -202,6 +202,13 @@ function generateDreamFAQs(dream: DreamSymbol): Array<{ question: string; answer
   }
 
   return baseFAQs;
+}
+
+// output: 'export' 모드에서 필수: 정적 생성할 slug 목록
+export async function generateStaticParams() {
+  return Object.keys(mockDreamData).map((slug) => ({
+    slug,
+  }));
 }
 
 // SEO 메타데이터 생성
