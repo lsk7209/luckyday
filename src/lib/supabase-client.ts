@@ -1,7 +1,14 @@
 /**
- * Supabase 클라이언트 설정
+ * Supabase 클라이언트 설정 (DEPRECATED)
+ * 
+ * ⚠️ 이 파일은 더 이상 사용되지 않습니다.
+ * Cloudflare D1 + Workers API 환경으로 전환되었습니다.
+ * 
+ * 새로운 코드에서는 `@/lib/api-client-dream`의 `workersDreamDb`를 사용하세요.
+ * 
+ * @deprecated Use `workersDreamDb` from `@/lib/api-client-dream` instead
  */
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js'; // REMOVED: Supabase 의존성 제거됨
 
 // 환경 변수가 설정되지 않은 경우 로컬 개발용 더미 값 사용
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://demo.supabase.co';

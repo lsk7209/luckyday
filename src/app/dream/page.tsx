@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DreamCard from '@/components/dream/dream-card';
 import { AdvancedSearch } from '@/components/advanced-search';
-import { dreamDb } from '@/lib/supabase-client';
+import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol } from '@/types/dream';
 
 const CATEGORIES = [
@@ -38,7 +38,7 @@ export default function DreamDictionary() {
   // 꿈 심볼 목록 조회
   const { data: dreams, isLoading, error } = useQuery({
     queryKey: ['dream-symbols', selectedCategory, sortBy, page],
-    queryFn: () => dreamDb.getDreamSymbols({
+    queryFn: () => workersDreamDb.getDreamSymbols({
       category: selectedCategory === 'all' ? undefined : selectedCategory,
       limit: pageSize,
       offset: (page - 1) * pageSize,

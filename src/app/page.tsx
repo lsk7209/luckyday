@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { PersonalizedRecommendations } from '@/components/personalized-recommendations';
-import { dreamDb } from '@/lib/supabase-client';
+import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol } from '@/types/dream';
 
 export default function Home() {
@@ -22,7 +22,7 @@ export default function Home() {
   // 인기 꿈 심볼 조회
   const { data: popularDreams, isLoading: dreamsLoading } = useQuery({
     queryKey: ['popular-dreams'],
-    queryFn: () => dreamDb.getDreamSymbols({
+    queryFn: () => workersDreamDb.getDreamSymbols({
       limit: 6,
       orderBy: 'popularity'
     }),

@@ -10,8 +10,7 @@ import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { dreamDb } from '@/lib/supabase-client';
-import { SearchResult } from '@/types/dream';
+import { workersDreamDb, DreamSymbol } from '@/lib/api-client-dream';
 
 interface SearchBoxProps {
   placeholder?: string;
@@ -34,7 +33,17 @@ export default function SearchBox({
   // 자동완성 검색
   const { data: suggestions, isLoading } = useQuery({
     queryKey: ['search-suggestions', query],
-    queryFn: () => query.length >= 2 ? dreamDb.searchDreamSymbols(query, 5) : [],
+    queryFn: async () => {
+      if (query.length < 2) return [];
+      const searchResult = await workersDreamDb.searchDreamSymbols(query, 5);
+      return searchResult.results.map(r => ({
+        ...r,
+        slug: r.slug,
+        name: r.name,
+        category: r.category,
+        popularity: r.popularity || 0
+      }));
+    },
     enabled: query.length >= 2,
     staleTime: 5 * 60 * 1000, // 5분
   });
@@ -57,7 +66,7 @@ export default function SearchBox({
     }
   };
 
-  const handleSuggestionClick = (suggestion: SearchResult) => {
+  const handleSuggestionClick = (suggestion: DreamSymbol) => {
     setQuery(suggestion.name);
     setShowSuggestions(false);
     router.push(`/dream/${suggestion.slug}`);

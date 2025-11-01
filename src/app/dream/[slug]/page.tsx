@@ -15,7 +15,7 @@ import AdSlot from '@/components/shared/ad-slot';
 import { BookmarkButton } from '@/components/bookmark';
 import { DreamShare } from '@/components/social-share';
 import MDXRenderer from '@/components/dream/mdx-renderer';
-import { dreamDb } from '@/lib/supabase-client';
+import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol, DreamPageProps } from '@/types/dream';
 
 // 임시 데이터 - 실제로는 API에서 가져올 예정

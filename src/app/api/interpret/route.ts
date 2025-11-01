@@ -2,10 +2,17 @@
  * AI 해몽 API 엔드포인트
  * @description 꿈 입력을 받아 AI로 분석하여 해몽 결과 반환
  */
+/**
+ * AI 해몽 API 엔드포인트 (OpenAI 직접 호출)
+ * @description OpenAI API를 직접 호출하고, 세션 저장은 Workers API로 전송
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { interpretDream } from '@/lib/openai-client';
-import { dreamDb } from '@/lib/supabase-client';
 import { DreamInput } from '@/types/dream';
+
+const WORKERS_API_URL = process.env.NEXT_PUBLIC_WORKERS_API_URL || 
+  process.env.NEXT_PUBLIC_SITE_URL?.replace('pages.dev', 'workers.dev') || 
+  'https://luckyday-api.workers.dev';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,9 +38,13 @@ export async function POST(request: NextRequest) {
     // AI 해몽 실행
     const result = await interpretDream(input);
 
-    // AI 세션 저장 (비동기로 실행)
-    dreamDb.saveAiSession(input, result)
-      .catch(error => console.error('AI session save error:', error));
+    // AI 세션 저장 (Workers API로 비동기 전송)
+    // TODO: Workers API에 AI 세션 저장 엔드포인트 추가 필요
+    fetch(`${WORKERS_API_URL}/api/ai/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: input, result })
+    }).catch(error => console.error('AI session save error:', error));
 
     return NextResponse.json({
       success: true,

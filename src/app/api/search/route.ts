@@ -2,8 +2,15 @@
  * 고급 검색 API 엔드포인트
  * @description 꿈 심볼 자연어 검색, 추천 시스템, 자동완성
  */
+/**
+ * 검색 API 엔드포인트 (Workers API 프록시)
+ * @description Cloudflare Workers API로 요청을 프록시
+ */
 import { NextRequest, NextResponse } from 'next/server';
-import { dreamDb } from '@/lib/supabase-client';
+
+const WORKERS_API_URL = process.env.NEXT_PUBLIC_WORKERS_API_URL || 
+  process.env.NEXT_PUBLIC_SITE_URL?.replace('pages.dev', 'workers.dev') || 
+  'https://luckyday-api.workers.dev';
 
 // 자연어 검색을 위한 키워드 매핑
 const NATURAL_LANGUAGE_KEYWORDS: Record<string, string[]> = {
@@ -141,34 +148,45 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 검색 로그 저장 (비동기로 실행)
-    dreamDb.saveSearchLog(query, request.headers.get('user-agent') || undefined)
-      .catch(error => console.error('Search log error:', error));
+    // Cloudflare Workers API로 검색 요청 프록시
+    const searchUrl = `${WORKERS_API_URL}/api/dream/search?q=${encodeURIComponent(query)}&limit=${limit}`;
+    
+    try {
+      const response = await fetch(searchUrl, {
+        headers: {
+          'User-Agent': request.headers.get('user-agent') || '',
+        }
+      });
 
-    // 기본 검색 수행
-    const basicResults = await dreamDb.searchDreamSymbols(query, limit * 2); // 더 많이 가져와서 필터링
+      if (!response.ok) {
+        throw new Error(`Workers API error: ${response.statusText}`);
+      }
 
-    // 고급 검색 점수 계산 및 정렬
-    const scoredResults = basicResults
-      .map(dream => ({
-        ...dream,
-        searchScore: calculateSearchScore(dream, query, query)
-      }))
-      .sort((a, b) => b.searchScore - a.searchScore)
-      .slice(0, limit);
-
-    // 추천 결과 생성
-    const recommendations = getRecommendations(basicResults, query, 3);
-
-    return NextResponse.json({
-      success: true,
-      results: scoredResults,
-      recommendations,
-      total: scoredResults.length,
-      query,
-      type: 'search',
-      searchScore: scoredResults.length > 0 ? scoredResults[0].searchScore : 0
-    });
+      const data = await response.json();
+      
+      // Workers API 응답을 그대로 반환 (추가 점수 계산은 Workers에서 처리)
+      return NextResponse.json({
+        success: data.success || false,
+        results: data.results || [],
+        recommendations: data.recommendations || [],
+        total: data.total || 0,
+        query: data.query || query,
+        type: 'search'
+      });
+    } catch (apiError) {
+      console.error('[Search API] Workers API 호출 실패:', apiError);
+      
+      // Fallback: 로컬 더미 데이터 반환
+      return NextResponse.json({
+        success: false,
+        error: '검색 서비스에 일시적인 문제가 발생했습니다.',
+        results: [],
+        recommendations: [],
+        total: 0,
+        query,
+        type: 'search'
+      }, { status: 503 });
+    }
 
   } catch (error) {
     console.error('Search API error:', error);
