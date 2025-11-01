@@ -90,16 +90,6 @@ export const metadata: Metadata = {
     'msapplication-TileColor': '#000000',
     'msapplication-config': '/browserconfig.xml',
   },
-  links: [
-    {
-      rel: 'preconnect',
-      href: 'https://cdn.jsdelivr.net',
-    },
-    {
-      rel: 'stylesheet',
-      href: 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css',
-    },
-  ],
 };
 
 export const viewport: Viewport = {
@@ -120,6 +110,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css"
+        />
+      </head>
       <body
         className={`${inter.variable} font-pretendard antialiased`}
         style={{ fontFamily: 'Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
