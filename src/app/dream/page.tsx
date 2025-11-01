@@ -19,24 +19,8 @@ import { AdvancedSearch } from '@/components/advanced-search';
 import { dreamDb } from '@/lib/supabase-client';
 import { DreamSymbol } from '@/types/dream';
 
-// 콘텐츠 렌더러 컴포넌트
-interface DreamContentRendererProps {
-  isLoadingData?: boolean;
-  error?: any;
-  displayDreams?: DreamSymbol[];
-  viewMode: 'grid' | 'list';
-  searchQuery?: string;
-  clearSearch?: () => void;
-}
-
-function DreamContentRenderer({
-  isLoadingData,
-  error,
-  displayDreams,
-  viewMode,
-  searchQuery,
-  clearSearch,
-}: DreamContentRendererProps) {
+// 콘텐츠 렌더링 함수
+const renderDreamContent = () => {
   if (isLoadingData) {
     return (
       <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
@@ -79,12 +63,12 @@ function DreamContentRenderer({
       <div className="text-muted-foreground mb-4">
         {searchQuery ? '검색 결과가 없습니다.' : '등록된 꿈 심볼이 없습니다.'}
       </div>
-      {searchQuery && clearSearch && (
+      {searchQuery && (
         <Button onClick={clearSearch}>전체 목록 보기</Button>
       )}
     </div>
   );
-}
+};
 
 const CATEGORIES = [
   { value: 'all', label: '전체' },
@@ -220,14 +204,7 @@ export default function DreamDictionary() {
         )}
       </div>
 
-      <DreamContentRenderer
-        isLoadingData={isLoadingData}
-        error={error}
-        displayDreams={displayDreams}
-        viewMode={viewMode}
-        searchQuery={searchQuery}
-        clearSearch={clearSearch}
-      />
+      {renderDreamContent()}
 
       {/* 페이지네이션 (검색이 아닐 때만) */}
       {!searchQuery && dreams && dreams.length >= pageSize && (
