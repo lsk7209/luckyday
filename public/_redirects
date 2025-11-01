@@ -1,22 +1,8 @@
 # DreamScope 리디렉션 규칙
 # Cloudflare Pages에서 자동 적용됨
 
-# API 리디렉션 (Cloudflare Functions로)
-/api/*  https://dreamscope-api.your-domain.workers.dev/api/:splat  200
-
-# 기존 URL 리디렉션 (SEO용)
-# /old-dream-interpretation  /dream  301
-# /dreams/*  /dream/:splat  301
-
-# 모바일 앱 딥링크
-/dreamscope/*  https://dreamscope-app.com/:splat  302
-
-# 소셜 미디어 리디렉션
-/share/*  https://your-domain.com/dream/:splat  302
-
-# 언어 리디렉션 (미래 확장용)
-# /en/*  https://en.your-domain.com/:splat  302
-# /ko/*  https://your-domain.com/:splat  302
+# API routes는 Cloudflare Pages에서 자동으로 Functions로 변환됨
+# 별도의 리디렉션 불필요
 
 # 관리자 리디렉션
 /admin  /admin/dashboard  301
@@ -24,5 +10,8 @@
 # 검색 리디렉션
 /search  /dream  302
 
-# 404 처리 (SPA용)
-/*    /404.html   404
+# SEO 리디렉션 (필요시 추가)
+# /old-page  /new-page  301
+
+# 404 처리 (Next.js에서 자동 처리되므로 불필요)
+# /*    /404.html   404

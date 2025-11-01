@@ -60,75 +60,8 @@ const nextConfig = {
     return config;
   },
 
-  // 헤더 설정
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'geolocation=(), microphone=(), camera=()',
-          },
-        ],
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=300, s-maxage=600',
-          },
-        ],
-      },
-      {
-        source: '/dream/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600, s-maxage=7200',
-          },
-        ],
-      },
-      {
-        source: '/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
-  },
-
-  // 리다이렉트 설정
-  async redirects() {
-    return [
-      {
-        source: '/home',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/calculator/:slug',
-        destination: '/utility/:slug',
-        permanent: true,
-      },
-    ];
-  },
+  // 헤더 및 리다이렉트 설정은 public/_headers 및 public/_redirects 파일로 이동됨
+  // output: 'export' 모드에서는 headers()와 redirects() 함수가 작동하지 않음
 
   // 환경 변수 설정
   env: {
@@ -138,9 +71,6 @@ const nextConfig = {
 
   // 보안 설정
   poweredByHeader: false,
-
-  // 서버 외부 패키지 설정 (Next.js 16 호환)
-  serverExternalPackages: ['@supabase/supabase-js'],
 };
 
 module.exports = nextConfig;
