@@ -86,6 +86,7 @@ const getMetrics = () => ({
     indexedPages: 450,
     pagesInQueue: 12,
     brokenLinks: 2,
+    sitemapLastUpdated: new Date('2024-01-31T08:30:00'),
   },
   analytics: {
     topSearchedDreams: [
