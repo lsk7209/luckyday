@@ -5,10 +5,16 @@
 import Link from 'next/link';
 import { Moon, Brain, BookOpen, FileText, Search, Github, Twitter, Mail } from 'lucide-react';
 
+type FooterLink = {
+  name: string;
+  href: string;
+  icon?: typeof BookOpen;
+};
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const footerLinks = {
+  const footerLinks: Record<string, FooterLink[]> = {
     서비스: [
       { name: '꿈 사전', href: '/dream', icon: BookOpen },
       { name: 'AI 해몽', href: '/ai', icon: Brain },
