@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dreamDb } from '@/lib/supabase-client';
 
 // 자연어 검색을 위한 키워드 매핑
-const NATURAL_LANGUAGE_KEYWORDS = {
+const NATURAL_LANGUAGE_KEYWORDS: Record<string, string[]> = {
   // 감정 관련
   '무서운': ['공포', '무서움', '두려움'],
   '기쁜': ['행복', '기쁨', '즐거움'],
