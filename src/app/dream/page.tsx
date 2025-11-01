@@ -154,8 +154,8 @@ export default function DreamDictionary() {
         )}
       </div>
 
-      {/* 콘텐츠 렌더링 - 조건문 없이 별도 div 사용 */}
-      <div className="content-loading" style={{ display: isLoadingData ? 'block' : 'none' }}>
+      {/* 콘텐츠 렌더링 */}
+      {isLoadingData && (
         <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -170,32 +170,29 @@ export default function DreamDictionary() {
             </Card>
           ))}
         </div>
-      </div>
+      )}
 
-      <div className="content-error" style={{ display: !isLoadingData && error ? 'block' : 'none' }}>
+      {!isLoadingData && error && (
         <div className="text-center py-12">
           <p className="text-red-500">데이터를 불러오는 중 오류가 발생했습니다.</p>
         </div>
-      </div>
+      )}
 
-      <div className="content-data" style={{ display: !isLoadingData && !error && displayDreams && displayDreams.length > 0 ? 'block' : 'none' }}>
+      {!isLoadingData && !error && displayDreams && displayDreams.length > 0 && (
         <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-          {displayDreams && displayDreams.map((dream: DreamSymbol) => (
+          {displayDreams.map((dream: DreamSymbol) => (
             <DreamCard key={dream.slug} dream={dream} />
           ))}
         </div>
-      </div>
+      )}
 
-      <div className="content-empty" style={{ display: !isLoadingData && !error && (!displayDreams || displayDreams.length === 0) ? 'block' : 'none' }}>
+      {!isLoadingData && !error && (!displayDreams || displayDreams.length === 0) && (
         <div className="text-center py-12">
           <div className="text-muted-foreground mb-4">
-            {searchQuery ? '검색 결과가 없습니다.' : '등록된 꿈 심볼이 없습니다.'}
+            등록된 꿈 심볼이 없습니다.
           </div>
-          {searchQuery && (
-            <Button onClick={clearSearch}>전체 목록 보기</Button>
-          )}
         </div>
-      </div>
+      )}
 
       {/* 페이지네이션 (검색이 아닐 때만) */}
       {!searchQuery && dreams && dreams.length >= pageSize && (
