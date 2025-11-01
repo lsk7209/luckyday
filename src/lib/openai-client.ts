@@ -165,7 +165,7 @@ async function generateSummary(input: any, hypotheses: DreamHypothesis[]): Promi
 - 감정: ${input.emotions?.join(', ') || '없음'}
 - 색상: ${input.colors?.join(', ') || '없음'}
 - 숫자: ${input.numbers?.join(', ') || '없음'}
-- 관계: ${input.relations?.map(r => `${r.role}${r.name ? '(' + r.name + ')' : ''}`).join(', ') || '없음'}
+- 관계: ${input.relations?.map((r: { role: string; name?: string }) => `${r.role}${r.name ? '(' + r.name + ')' : ''}`).join(', ') || '없음'}
 - 세부사항: ${input.details || '없음'}
 
 ## 분석된 가설

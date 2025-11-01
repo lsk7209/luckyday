@@ -1,9 +1,11 @@
 /**
- * 검색 API 서비스
+ * 검색 API 서비스 (DEPRECATED)
  * 통합 검색 기능
+ *
+ * ⚠️ Cloudflare Pages 정적 호스팅에서는 사용되지 않습니다.
  */
 
-// import { apiClient } from './api-client';
+// import { apiClient } from '../api-client';
 import { Content } from '@/types/content';
 
 // 타입 정의
@@ -25,30 +27,26 @@ export interface SearchResponse {
   suggestions?: string[];
 }
 
-// 통합 검색
-export async function searchContent(params: SearchParams): Promise<SearchResponse> {
-  const queryParams: Record<string, string> = {
-    q: params.q,
-  };
-
-  if (params.type) queryParams.type = params.type;
-  if (params.limit) queryParams.limit = params.limit.toString();
-  if (params.offset) queryParams.offset = params.offset.toString();
-  if (params.tags && params.tags.length > 0) {
-    queryParams.tags = params.tags.join(',');
-  }
-
-  return apiClient.get<SearchResponse>('/search', queryParams);
+// 통합 검색 (더미 구현)
+export async function searchContent(_params: SearchParams): Promise<SearchResponse> {
+  return Promise.resolve({
+    query: _params.q,
+    results: [],
+    total: 0,
+    limit: _params.limit || 20,
+    offset: _params.offset || 0,
+    hasMore: false,
+  });
 }
 
-// 인기 검색어 조회
-export async function getPopularSearches(limit: number = 10): Promise<string[]> {
-  return apiClient.get<string[]>(`/search/popular?limit=${limit}`);
+// 인기 검색어 조회 (더미 구현)
+export async function getPopularSearches(_limit: number = 10): Promise<string[]> {
+  return Promise.resolve([]);
 }
 
-// 검색 제안
-export async function getSearchSuggestions(query: string): Promise<string[]> {
-  return apiClient.get<string[]>(`/search/suggestions?q=${encodeURIComponent(query)}`);
+// 검색 제안 (더미 구현)
+export async function getSearchSuggestions(_query: string): Promise<string[]> {
+  return Promise.resolve([]);
 }
 
 // 검색 통계
@@ -64,12 +62,13 @@ export interface SearchStats {
 }
 
 export async function getSearchStats(
-  startDate?: string,
-  endDate?: string
+  _startDate?: string,
+  _endDate?: string
 ): Promise<SearchStats> {
-  const params: Record<string, string> = {};
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-
-  return apiClient.get<SearchStats>('/search/stats', params);
+  return Promise.resolve({
+    totalSearches: 0,
+    uniqueQueries: 0,
+    averageResults: 0,
+    topQueries: [],
+  });
 }

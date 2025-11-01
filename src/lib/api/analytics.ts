@@ -1,9 +1,12 @@
 /**
- * 분석 API 서비스
+ * 분석 API 서비스 (DEPRECATED)
  * 방문자 분석 및 통계 데이터
+ *
+ * ⚠️ Cloudflare Pages 정적 호스팅에서는 사용되지 않습니다.
+ * 정적 사이트에서는 분석 API가 필요하지 않습니다.
  */
 
-import { apiClient } from './api-client';
+// import { apiClient } from '../api-client'; // 제거됨
 
 // 타입 정의
 export interface TrackEventRequest {
@@ -91,69 +94,72 @@ export interface FunnelData {
   };
 }
 
-// 이벤트 추적
-export async function trackEvent(data: TrackEventRequest): Promise<void> {
-  return apiClient.post<void>('/analytics/event', data);
+// 이벤트 추적 (더미 구현)
+export async function trackEvent(_data: TrackEventRequest): Promise<void> {
+  return Promise.resolve();
 }
 
-// 페이지뷰 추적
-export async function trackPageview(data: TrackPageviewRequest): Promise<void> {
-  return apiClient.post<void>('/analytics/pageview', data);
+// 페이지뷰 추적 (더미 구현)
+export async function trackPageview(_data: TrackPageviewRequest): Promise<void> {
+  return Promise.resolve();
 }
 
-// 분석 개요 조회
+// 분석 개요 조회 (더미 구현)
 export async function getAnalyticsOverview(
-  startDate?: string,
-  endDate?: string
+  _startDate?: string,
+  _endDate?: string
 ): Promise<AnalyticsOverview> {
-  const params: Record<string, string> = {};
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-
-  return apiClient.get<AnalyticsOverview>('/analytics/overview', params);
+  return Promise.resolve({
+    totalSessions: 0,
+    totalEvents: 0,
+    pageViews: 0,
+    avgSessionDuration: 0,
+  });
 }
 
-// 페이지별 통계 조회
+// 페이지별 통계 조회 (더미 구현)
 export async function getPageStats(
-  startDate?: string,
-  endDate?: string,
-  limit: number = 50
+  _startDate?: string,
+  _endDate?: string,
+  _limit: number = 50
 ): Promise<PageStats[]> {
-  const params: Record<string, string> = { limit: limit.toString() };
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-
-  return apiClient.get<PageStats[]>('/analytics/pages', params);
+  return Promise.resolve([]);
 }
 
-// 채널별 통계 조회
+// 채널별 통계 조회 (더미 구현)
 export async function getChannelStats(
-  startDate?: string,
-  endDate?: string
+  _startDate?: string,
+  _endDate?: string
 ): Promise<ChannelStats[]> {
-  const params: Record<string, string> = {};
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-
-  return apiClient.get<ChannelStats[]>('/analytics/channels', params);
+  return Promise.resolve([]);
 }
 
-// 실시간 메트릭 조회
+// 실시간 메트릭 조회 (더미 구현)
 export async function getRealtimeMetrics(): Promise<RealtimeMetrics> {
-  return apiClient.get<RealtimeMetrics>('/analytics/realtime');
+  return Promise.resolve({
+    activeUsers: 0,
+    currentPageViews: 0,
+    topPages: [],
+    topSources: [],
+    eventsPerMinute: 0,
+    timestamp: new Date().toISOString(),
+  });
 }
 
-// 퍼널 분석 조회
+// 퍼널 분석 조회 (더미 구현)
 export async function getFunnelData(
-  funnelName: string,
-  startDate?: string,
-  endDate?: string
+  _funnelName: string,
+  _startDate?: string,
+  _endDate?: string
 ): Promise<FunnelData> {
-  const params: Record<string, string> = { name: funnelName };
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-
-  return apiClient.get<FunnelData>('/analytics/funnel', params);
+  return Promise.resolve({
+    name: _funnelName,
+    steps: [],
+    dateRange: {
+      start: _startDate || '',
+      end: _endDate || '',
+    },
+  });
 }
 
 // 키워드 성과 분석
@@ -169,15 +175,11 @@ export interface KeywordPerformance {
 }
 
 export async function getKeywordPerformance(
-  startDate?: string,
-  endDate?: string,
-  limit: number = 100
+  _startDate?: string,
+  _endDate?: string,
+  _limit: number = 100
 ): Promise<KeywordPerformance[]> {
-  const params: Record<string, string> = { limit: limit.toString() };
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-
-  return apiClient.get<KeywordPerformance[]>('/analytics/keywords', params);
+  return Promise.resolve([]);
 }
 
 // 세션별 상세 데이터
@@ -214,9 +216,23 @@ export interface SessionDetails {
 }
 
 export async function getSessionDetails(
-  sessionId: string
+  _sessionId: string
 ): Promise<SessionDetails> {
-  return apiClient.get<SessionDetails>(`/analytics/session/${sessionId}`);
+  return Promise.resolve({
+    sessionId: _sessionId,
+    startTime: '',
+    duration: 0,
+    pageViews: 0,
+    events: [],
+    device: {
+      userAgent: '',
+      browser: '',
+      os: '',
+      device: '',
+    },
+    location: {},
+    source: {},
+  });
 }
 
 // 사용자 여정 분석
@@ -233,13 +249,19 @@ export interface UserJourney {
 }
 
 export async function getUserJourney(
-  userId: string,
-  startDate?: string,
-  endDate?: string
+  _userId: string,
+  _startDate?: string,
+  _endDate?: string
 ): Promise<UserJourney> {
-  const params: Record<string, string> = {};
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-
-  return apiClient.get<UserJourney>(`/analytics/user/${userId}/journey`, params);
+  return Promise.resolve({
+    userId: _userId,
+    sessions: [],
+    totalSessions: 0,
+    totalPageViews: 0,
+    totalEvents: 0,
+    firstVisit: '',
+    lastVisit: '',
+    channels: [],
+    topPages: [],
+  });
 }
