@@ -12,8 +12,18 @@ const nextConfig = {
     webpackBuildWorker: true,
   },
 
-  // Turbopack 설정 (개발용)
-  turbopack: {},
+  // Turbopack 비활성화 - webpack 사용 (JSX 파싱 호환성 문제 해결)
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // 기본 설정 유지
+    if (!dev && !isServer) {
+      config.plugins.push(
+        new webpack.DefinePlugin({
+          __BUILD_ID__: JSON.stringify(buildId),
+        })
+      );
+    }
+    return config;
+  },
 
   // 이미지 최적화 (Next.js 16 호환)
   images: {
@@ -46,19 +56,6 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
-  // 번들 최적화 (개발용)
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // 번들 분석 (프로덕션에서만)
-    if (!dev && !isServer) {
-      config.plugins.push(
-        new webpack.DefinePlugin({
-          __BUILD_ID__: JSON.stringify(buildId),
-        })
-      );
-    }
-
-    return config;
-  },
 
   // 헤더 및 리다이렉트 설정은 public/_headers 및 public/_redirects 파일로 이동됨
   // output: 'export' 모드에서는 headers()와 redirects() 함수가 작동하지 않음
