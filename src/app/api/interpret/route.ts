@@ -10,9 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { interpretDream } from '@/lib/openai-client';
 import { DreamInput } from '@/types/dream';
 
-const WORKERS_API_URL = process.env.NEXT_PUBLIC_WORKERS_API_URL || 
-  process.env.NEXT_PUBLIC_SITE_URL?.replace('pages.dev', 'workers.dev') || 
-  'https://luckyday-api.workers.dev';
+import { getWorkersApiUrl } from '@/lib/workers-api-url';
+
+const WORKERS_API_URL = getWorkersApiUrl();
 
 export async function POST(request: NextRequest) {
   try {

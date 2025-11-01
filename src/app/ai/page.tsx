@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import DreamCard from '@/components/dream/dream-card';
 import RelatedList from '@/components/shared/related-list';
 import { DreamInput, DreamInterpretation } from '@/types/dream';
+import { interpretDream } from '@/lib/openai-client';
 
 const EMOTIONS = [
   '평온', '불안', '공포', '기쁨', '슬픔', '분노', '흥분', '혼란'
@@ -56,20 +57,12 @@ export default function AIInterpretation() {
   // AI 해몽 뮤테이션
   const interpretMutation = useMutation({
     mutationFn: async (dreamInput: DreamInput) => {
-      const response = await fetch('/api/interpret', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dreamInput),
-      });
-
-      if (!response.ok) {
-        throw new Error('해몽 생성에 실패했습니다.');
-      }
-
-      const data = await response.json();
-      return data.result as DreamInterpretation;
+      // OpenAI API 직접 호출
+      // 주의: output: 'export' 모드에서는 Next.js API Routes가 작동하지 않으므로
+      // 클라이언트에서 직접 OpenAI API를 호출합니다
+      // ⚠️ 보안 경고: API 키가 클라이언트에 노출될 수 있으므로 Workers API 사용을 권장합니다
+      // TODO: Workers API에 /api/ai/interpret 엔드포인트 구현 필요
+      return await interpretDream(dreamInput);
     },
     onSuccess: (data) => {
       setResult(data);

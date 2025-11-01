@@ -1,10 +1,16 @@
 /**
  * OpenAI 클라이언트 설정 - DreamScope AI 해몽
+ * 
+ * ⚠️ 주의: 클라이언트 사이드에서 사용 시 API 키가 노출될 수 있습니다.
+ * 보안을 위해 Workers API를 통해 호출하는 것을 권장합니다.
  */
 import OpenAI from 'openai';
 
+// 클라이언트 사이드에서 환경 변수는 NEXT_PUBLIC_ 접두사가 필요합니다
+// 하지만 보안상 API 키를 클라이언트에 노출하면 안 되므로
+// 이 함수는 Workers API를 통해 호출해야 합니다
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || process.env.OPENAI_API_KEY || '',
 });
 
 export interface DreamHypothesis {

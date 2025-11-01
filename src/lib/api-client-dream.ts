@@ -7,9 +7,9 @@
 
 import { DreamSymbol as DreamSymbolType } from '@/types/dream';
 
-const WORKERS_API_URL = process.env.NEXT_PUBLIC_WORKERS_API_URL || 
-  process.env.NEXT_PUBLIC_SITE_URL?.replace('pages.dev', 'workers.dev') || 
-  'https://luckyday-api.workers.dev';
+import { getWorkersApiUrl } from './workers-api-url';
+
+const WORKERS_API_URL = getWorkersApiUrl();
 
 // 공통 타입 재export
 export type DreamSymbol = DreamSymbolType;

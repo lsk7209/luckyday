@@ -8,9 +8,9 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 
-const WORKERS_API_URL = process.env.NEXT_PUBLIC_WORKERS_API_URL || 
-  process.env.NEXT_PUBLIC_SITE_URL?.replace('pages.dev', 'workers.dev') || 
-  'https://luckyday-api.workers.dev';
+import { getWorkersApiUrl } from '@/lib/workers-api-url';
+
+const WORKERS_API_URL = getWorkersApiUrl();
 
 // 자연어 검색을 위한 키워드 매핑
 const NATURAL_LANGUAGE_KEYWORDS: Record<string, string[]> = {
