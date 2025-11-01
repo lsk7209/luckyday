@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuHeader,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -193,7 +192,7 @@ export function NotificationSystem() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
-        <DropdownMenuHeader className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-4 border-b">
           <h4 className="font-semibold">알림</h4>
           {unreadCount > 0 && (
             <Button
@@ -205,7 +204,7 @@ export function NotificationSystem() {
               모두 읽음
             </Button>
           )}
-        </DropdownMenuHeader>
+        </div>
 
         <DropdownMenuSeparator />
 

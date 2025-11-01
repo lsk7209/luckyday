@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Download, X, Smartphone, Monitor } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -24,7 +23,6 @@ export function PWAInstallPrompt() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     // 서비스 워커 등록
@@ -41,18 +39,7 @@ export function PWAInstallPrompt() {
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                     // 새 버전 사용 가능
-                    toast({
-                      title: "업데이트 가능",
-                      description: "새 버전이 있습니다. 페이지를 새로고침해주세요.",
-                      action: (
-                        <Button
-                          size="sm"
-                          onClick={() => window.location.reload()}
-                        >
-                          새로고침
-                        </Button>
-                      ),
-                    });
+                    console.log("PWA 업데이트 가능: 새 버전이 있습니다. 페이지를 새로고침해주세요.");
                   }
                 });
               }
@@ -84,10 +71,7 @@ export function PWAInstallPrompt() {
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
 
-      toast({
-        title: "설치 완료! 🎉",
-        description: "DreamScope가 성공적으로 설치되었습니다.",
-      });
+      console.log("PWA 설치 완료! DreamScope가 성공적으로 설치되었습니다.");
     };
 
     // 온라인/오프라인 상태 감지

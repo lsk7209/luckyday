@@ -67,7 +67,7 @@ allowed_origins = [
   "http://localhost:3000",
   "http://localhost:8788",  # Cloudflare dev server
   "https://dreamscope.pages.dev",
-  "https://your-domain.com"
+  "https://your-domain.com"  # 실제 도메인으로 변경 필요
 ]
 allow_credentials = true
 allow_headers = ["Authorization", "Content-Type", "X-Requested-With", "X-API-Key"]
@@ -82,15 +82,14 @@ max_age = 86400
 # Content Security Policy, HSTS, etc.
 
 # =================================================================
-# Pages Functions 설정 (선택사항)
+# Cloudflare Pages 설정
 # =================================================================
 
-# Cloudflare Pages에서 API를 처리할 경우
-# [pages_build_output_dir] = "dist"
-# [pages_build_config]
-# build_command = "npm run build"
-# destination_dir = "dist"
-# root_dir = "."
+[pages_build_output_dir] = "out"
+[pages_build_config]
+build_command = "npm run build"
+destination_dir = "out"
+root_dir = "."
 
 # =================================================================
 # 모니터링 및 로깅

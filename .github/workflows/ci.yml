@@ -100,7 +100,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: nextjs-build
-        path: .next/
+        path: out/
         retention-days: 7
 
   lighthouse:
@@ -126,7 +126,7 @@ jobs:
       run: npm run build
 
     - name: Start application
-      run: npm start &
+      run: npx serve out -p 3000 &
       env:
         PORT: 3000
 

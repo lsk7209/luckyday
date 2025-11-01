@@ -6,7 +6,6 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -49,8 +48,6 @@ export function Providers({ children }: ProvidersProps) {
     <ThemeProvider defaultTheme="system" storageKey="dreamscope-theme">
       <QueryClientProvider client={queryClient}>
         {children}
-        {/* 개발 환경에서만 React Query DevTools 표시 */}
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
       </QueryClientProvider>
     </ThemeProvider>
   );

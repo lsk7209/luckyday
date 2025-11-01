@@ -6,7 +6,6 @@
  */
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,7 +26,6 @@ export function BookmarkButton({
 }: BookmarkButtonProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   // 북마크 상태 초기화 (localStorage에서 불러오기)
   useEffect(() => {
@@ -67,28 +65,18 @@ export function BookmarkButton({
         saveBookmarksToStorage(newBookmarks);
         setIsBookmarked(false);
 
-        toast({
-          title: "북마크 제거됨",
-          description: `"${dreamName}" 꿈이 북마크에서 제거되었습니다.`,
-        });
+        console.log(`북마크 제거됨: "${dreamName}" 꿈이 북마크에서 제거되었습니다.`);
       } else {
         // 북마크 추가
         const newBookmarks = [...currentBookmarks, dreamSlug];
         saveBookmarksToStorage(newBookmarks);
         setIsBookmarked(true);
 
-        toast({
-          title: "북마크 추가됨",
-          description: `"${dreamName}" 꿈이 북마크에 추가되었습니다.`,
-        });
+        console.log(`북마크 추가됨: "${dreamName}" 꿈이 북마크에 추가되었습니다.`);
       }
     } catch (error) {
       console.error('북마크 토글 실패:', error);
-      toast({
-        title: "오류 발생",
-        description: "북마크 처리 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
+      console.error("북마크 처리 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }

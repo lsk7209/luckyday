@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import "@fontsource/pretendard/400.css";
-import "@fontsource/pretendard/500.css";
-import "@fontsource/pretendard/600.css";
-import "@fontsource/pretendard/700.css";
 import MainLayout from "@/components/layout/main-layout";
 import { Providers } from "@/lib/providers";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -98,6 +94,16 @@ export const metadata: Metadata = {
     'msapplication-TileColor': '#000000',
     'msapplication-config': '/browserconfig.xml',
   },
+  links: [
+    {
+      rel: 'preconnect',
+      href: 'https://cdn.jsdelivr.net',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css',
+    },
+  ],
 };
 
 export const viewport: Viewport = {
