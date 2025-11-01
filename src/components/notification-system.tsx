@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 
 export interface Notification {
   id: string;
-  type: 'info' | 'success' | 'warning' | 'dream_update' | 'ai_insight';
+  type: 'info' | 'success' | 'warning' | 'error' | 'dream_update' | 'ai_insight';
   title: string;
   message: string;
   timestamp: Date;
@@ -338,7 +338,7 @@ export function useNotifications() {
 // 토스트 알림 컴포넌트 (간단 버전)
 interface ToastNotificationProps {
   message: string;
-  type?: 'info' | 'success' | 'warning' | 'error';
+  type?: 'info' | 'success' | 'warning' | 'error' | 'dream_update' | 'ai_insight';
   duration?: number;
   onClose?: () => void;
 }
