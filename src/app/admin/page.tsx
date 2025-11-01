@@ -5,6 +5,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   TrendingUp,
   TrendingDown,
@@ -20,6 +21,9 @@ import {
   BarChart3,
   Database,
   Zap,
+  PieChart,
+  Activity,
+  Target,
 } from 'lucide-react';
 
 // 임시 데이터 - 실제로는 API에서 가져올 예정
@@ -48,6 +52,50 @@ const metrics = {
     indexedPages: 450,
     pagesInQueue: 12,
     brokenLinks: 2,
+  },
+  analytics: {
+    topSearchedDreams: [
+      { name: '뱀 꿈', searches: 1250, trend: 'up' },
+      { name: '이빨 꿈', searches: 980, trend: 'up' },
+      { name: '물 꿈', searches: 750, trend: 'stable' },
+      { name: '하늘 꿈', searches: 620, trend: 'down' },
+      { name: '집 꿈', searches: 580, trend: 'up' },
+    ],
+    userDemographics: {
+      ageGroups: [
+        { range: '18-24', percentage: 25.5 },
+        { range: '25-34', percentage: 35.2 },
+        { range: '35-44', percentage: 22.1 },
+        { range: '45-54', percentage: 12.8 },
+        { range: '55+', percentage: 4.4 },
+      ],
+      devices: [
+        { type: '모바일', percentage: 68.5 },
+        { type: '데스크톱', percentage: 25.3 },
+        { type: '태블릿', percentage: 6.2 },
+      ],
+    },
+    userBehavior: {
+      avgTimeOnPage: 185, // 초
+      returnVisitorRate: 42.3,
+      bookmarkRate: 15.7,
+      shareRate: 8.2,
+    },
+    searchPatterns: {
+      commonQueries: [
+        '무서운 꿈',
+        '결혼 꿈',
+        '시험 꿈',
+        '돈 꿈',
+        '죽음 꿈',
+      ],
+      peakHours: [
+        { hour: '22:00-24:00', searches: 1450 },
+        { hour: '18:00-22:00', searches: 1200 },
+        { hour: '06:00-10:00', searches: 980 },
+      ],
+    },
+  },
     sitemapLastUpdated: new Date('2024-01-31T08:30:00'),
   },
   recentActivity: [
@@ -89,13 +137,24 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       {/* 페이지 헤더 */}
       <div>
-        <h1 className="text-3xl font-bold">대시보드</h1>
+        <h1 className="text-3xl font-bold flex items-center">
+          <BarChart3 className="mr-2 h-8 w-8" />
+          DreamScope 관리자
+        </h1>
         <p className="text-muted-foreground">
-          CMS 운영 현황 및 주요 메트릭을 확인하세요.
+          꿈 해몽 서비스 운영 현황 및 주요 메트릭을 확인하세요.
         </p>
       </div>
 
-      {/* 주요 메트릭 카드 */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">개요</TabsTrigger>
+          <TabsTrigger value="content">콘텐츠 관리</TabsTrigger>
+          <TabsTrigger value="analytics">사용자 분석</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {/* 주요 메트릭 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -229,34 +288,44 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Brain className="h-5 w-5" />
-              <span>AI 분석 현황</span>
+              <span>AI 성능 모니터링</span>
             </CardTitle>
             <CardDescription>
-              AI 해몽 서비스 사용 현황 및 성능
+              AI 해몽 서비스 실시간 성능 지표 및 품질 모니터링
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">총 해몽 수</span>
-              <div className="flex items-center space-x-2">
-                <Brain className="h-4 w-4 text-blue-500" />
-                <span className="font-medium">{metrics.ai.totalInterpretations.toLocaleString()}회</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">총 해몽 수</span>
+                <div className="flex items-center space-x-2">
+                  <Brain className="h-4 w-4 text-blue-500" />
+                  <span className="font-medium">{metrics.ai.totalInterpretations.toLocaleString()}회</span>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-sm">평균 응답시간</span>
-              <div className="flex items-center space-x-2">
-                <Zap className="h-4 w-4 text-green-500" />
-                <span className="font-medium">{metrics.ai.avgResponseTime}초</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">평균 응답시간</span>
+                <div className="flex items-center space-x-2">
+                  <Zap className="h-4 w-4 text-green-500" />
+                  <span className="font-medium">{metrics.ai.avgResponseTime}초</span>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-sm">성공률</span>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="font-medium">{metrics.ai.successRate}%</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">성공률</span>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="font-medium">{metrics.ai.successRate}%</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm">사용자 만족도</span>
+                <div className="flex items-center space-x-2">
+                  <Activity className="h-4 w-4 text-purple-500" />
+                  <span className="font-medium">4.8/5.0</span>
+                </div>
               </div>
             </div>
 
@@ -271,8 +340,53 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            <div className="pt-2 border-t">
+              <div className="text-sm text-muted-foreground mb-3">AI 성능 상태</div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">응답 속도</span>
+                  <Badge variant="outline" className="bg-green-50 text-green-700">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    양호
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">정확도</span>
+                  <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    개선중
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">사용률</span>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    상승
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t">
+              <div className="text-sm text-muted-foreground mb-2">최근 AI 성능 로그</div>
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>• 응답 시간 최적화 완료</span>
+                  <span>2시간 전</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>• 감정 분석 모델 업데이트</span>
+                  <span>1일 전</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>• 새로운 꿈 패턴 학습</span>
+                  <span>3일 전</span>
+                </div>
+              </div>
+            </div>
+
             <Button size="sm" className="w-full" variant="outline">
-              AI 모니터링
+              상세 AI 모니터링
             </Button>
           </CardContent>
         </Card>
@@ -397,6 +511,240 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>콘텐츠 관리</CardTitle>
+              <CardDescription>
+                꿈 데이터 CRUD 관리 및 콘텐츠 현황
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Moon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">콘텐츠 관리</h3>
+                <p className="text-muted-foreground mb-4">
+                  꿈 데이터 추가, 수정, 삭제 및 관리 기능을 제공합니다.
+                </p>
+                <Button asChild>
+                  <a href="/admin/content">
+                    콘텐츠 관리 페이지로 이동
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          {/* 사용자 분석 메트릭 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">평균 체류시간</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {Math.floor(metrics.analytics.userBehavior.avgTimeOnPage / 60)}분 {metrics.analytics.userBehavior.avgTimeOnPage % 60}초
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  페이지당 평균 체류시간
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">재방문율</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {metrics.analytics.userBehavior.returnVisitorRate}%
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  재방문 사용자 비율
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">북마크율</CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {metrics.analytics.userBehavior.bookmarkRate}%
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  꿈 해석 북마크 비율
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">공유율</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {metrics.analytics.userBehavior.shareRate}%
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  콘텐츠 공유 비율
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 인기 검색어 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span>인기 검색 꿈</span>
+                </CardTitle>
+                <CardDescription>
+                  가장 많이 검색된 꿈 심볼 순위
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {metrics.analytics.topSearchedDreams.map((dream, index) => (
+                    <div key={dream.name} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-medium text-muted-foreground w-6">
+                          {index + 1}
+                        </span>
+                        <span className="font-medium">{dream.name}</span>
+                        {dream.trend === 'up' && (
+                          <TrendingUp className="h-4 w-4 text-green-500" />
+                        )}
+                        {dream.trend === 'down' && (
+                          <TrendingDown className="h-4 w-4 text-red-500" />
+                        )}
+                        {dream.trend === 'stable' && (
+                          <div className="h-4 w-4 border-t-2 border-gray-400" />
+                        )}
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {dream.searches.toLocaleString()}회
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 사용자 연령대 분포 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <PieChart className="h-5 w-5" />
+                  <span>사용자 연령대</span>
+                </CardTitle>
+                <CardDescription>
+                  방문자 연령대별 분포
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {metrics.analytics.userDemographics.ageGroups.map((group) => (
+                    <div key={group.range} className="flex items-center justify-between">
+                      <span className="font-medium">{group.range}세</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-24 bg-secondary rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full"
+                            style={{ width: `${group.percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-muted-foreground w-10">
+                          {group.percentage}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 기기별 사용 현황 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>기기별 사용 현황</CardTitle>
+                <CardDescription>
+                  모바일/데스크톱/태블릿 사용 비율
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {metrics.analytics.userDemographics.devices.map((device) => (
+                    <div key={device.type} className="flex items-center justify-between">
+                      <span className="font-medium">{device.type}</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-24 bg-secondary rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full"
+                            style={{ width: `${device.percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-muted-foreground w-10">
+                          {device.percentage}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 검색 패턴 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>검색 패턴 분석</CardTitle>
+                <CardDescription>
+                  시간대별 검색량 및 인기 검색어
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">피크 타임</h4>
+                    <div className="space-y-2">
+                      {metrics.analytics.searchPatterns.peakHours.map((peak) => (
+                        <div key={peak.hour} className="flex items-center justify-between text-sm">
+                          <span>{peak.hour}</span>
+                          <span className="text-muted-foreground">
+                            {peak.searches.toLocaleString()}회
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-2">인기 검색어</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {metrics.analytics.searchPatterns.commonQueries.map((query) => (
+                        <Badge key={query} variant="outline">
+                          {query}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

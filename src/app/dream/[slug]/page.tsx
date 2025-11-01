@@ -12,6 +12,7 @@ import TableOfContents from '@/components/shared/table-of-contents';
 import FAQAccordion from '@/components/shared/faq-accordion';
 import RelatedList from '@/components/shared/related-list';
 import AdSlot from '@/components/shared/ad-slot';
+import { BookmarkButton } from '@/components/bookmark';
 import { dreamDb } from '@/lib/supabase-client';
 import { DreamSymbol, DreamPageProps } from '@/types/dream';
 
@@ -286,6 +287,18 @@ export default async function DreamPage({ params }: DreamPageProps) {
                 {tag}
               </Badge>
             ))}
+          </div>
+
+          {/* 북마크 버튼 */}
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="text-sm text-muted-foreground">
+              이 꿈 해석이 도움이 되셨나요?
+            </div>
+            <BookmarkButton
+              dreamSlug={dream.slug}
+              dreamName={dream.name}
+              showText={true}
+            />
           </div>
 
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">

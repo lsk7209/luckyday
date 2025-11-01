@@ -7,6 +7,7 @@ import { TrendingUp, Tag } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BookmarkButton } from '@/components/bookmark';
 import { DreamCardProps } from '@/types/dream';
 
 export default function DreamCard({ dream, href }: DreamCardProps) {
@@ -49,9 +50,16 @@ export default function DreamCard({ dream, href }: DreamCardProps) {
           )}
         </div>
 
-        <Button size="sm" className="w-full" asChild>
-          <Link href={cardHref}>해몽 보기</Link>
-        </Button>
+        <div className="flex space-x-2">
+          <Button size="sm" className="flex-1" asChild>
+            <Link href={cardHref}>해몽 보기</Link>
+          </Button>
+          <BookmarkButton
+            dreamSlug={dream.slug}
+            dreamName={dream.name}
+            size="sm"
+          />
+        </div>
       </CardContent>
     </Card>
   );

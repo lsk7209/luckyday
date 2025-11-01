@@ -6,25 +6,27 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Search, Calculator, BookOpen, FileText } from 'lucide-react';
+import { Menu, X, Search, Moon, Sparkles, BookOpen, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useBookmarks } from '@/components/bookmark';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { bookmarks } = useBookmarks();
 
   const navigation = [
     { name: '홈', href: '/', icon: null },
-    { name: '계산기', href: '/utility', icon: Calculator },
-    { name: '가이드', href: '/guide', icon: BookOpen },
-    { name: '블로그', href: '/blog', icon: FileText },
+    { name: '꿈 사전', href: '/dream', icon: BookOpen },
+    { name: 'AI 해몽', href: '/ai', icon: Sparkles },
+    { name: '북마크', href: '/bookmarks', icon: Bookmark, badge: bookmarks.length > 0 ? bookmarks.length : null },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+      window.location.href = `/dream?q=${encodeURIComponent(searchQuery.trim())}`;
     }
   };
 
@@ -34,8 +36,8 @@ export default function Header() {
         {/* Logo */}
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center space-x-2">
-            <Calculator className="h-6 w-6" />
-            <span className="font-bold text-xl">CMS Calculator</span>
+            <Moon className="h-6 w-6 text-primary" />
+            <span className="font-bold text-xl">DreamScope</span>
           </Link>
         </div>
 
@@ -45,10 +47,15 @@ export default function Header() {
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="relative flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {item.icon && <item.icon className="h-4 w-4" />}
               <span>{item.name}</span>
+              {item.badge && (
+                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -91,11 +98,16 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center space-x-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="relative flex items-center space-x-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.icon && <item.icon className="h-4 w-4" />}
                   <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold ml-2">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
 

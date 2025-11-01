@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DreamCard from '@/components/dream/dream-card';
-import SearchBox from '@/components/shared/search-box';
+import { AdvancedSearch } from '@/components/advanced-search';
 import { dreamDb } from '@/lib/supabase-client';
 import { DreamSymbol } from '@/types/dream';
 
@@ -34,14 +34,15 @@ export default function DreamDictionary() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
 
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState<'popularity' | 'name'>('popularity');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [page, setPage] = useState(1);
+  const [searchResults, setSearchResults] = useState<DreamSymbol[]>([]);
+  const [isSearchMode, setIsSearchMode] = useState(false);
   const pageSize = 20;
 
-  // 꿈 심볼 목록 조회
+  // 꿈 심볼 목록 조회 (검색 모드가 아닐 때만)
   const { data: dreams, isLoading, error } = useQuery({
     queryKey: ['dream-symbols', selectedCategory, sortBy, page],
     queryFn: () => dreamDb.getDreamSymbols({
@@ -53,26 +54,21 @@ export default function DreamDictionary() {
     staleTime: 10 * 60 * 1000, // 10분
   });
 
-  // 검색 결과 조회
-  const { data: searchResults, isLoading: searchLoading } = useQuery({
-    queryKey: ['dream-search', searchQuery],
-    queryFn: () => searchQuery ? dreamDb.searchDreamSymbols(searchQuery, 50) : [],
-    enabled: searchQuery.length >= 2,
-    staleTime: 5 * 60 * 1000, // 5분
-  });
-
-  const displayDreams = searchQuery ? searchResults : dreams;
-  const isLoadingData = searchQuery ? searchLoading : isLoading;
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+  // 검색 핸들러
+  const handleAdvancedSearch = (query: string, results: DreamSymbol[]) => {
+    setSearchResults(results);
+    setIsSearchMode(results.length > 0);
     setPage(1);
   };
 
   const clearSearch = () => {
-    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearchMode(false);
     setPage(1);
   };
+
+  const displayDreams = isSearchMode ? searchResults : dreams;
+  const isLoadingData = isLoading;
 
   return (
     <div className="space-y-8">
@@ -84,16 +80,17 @@ export default function DreamDictionary() {
         </p>
       </div>
 
-      {/* 검색 및 필터 */}
-      <div className="space-y-6">
-        <div className="max-w-md mx-auto">
-          <SearchBox
-            placeholder="꿈에 나온 것을 검색하세요..."
-            onSearch={handleSearch}
-          />
-        </div>
+      {/* 고급 검색 */}
+      <div className="max-w-4xl mx-auto">
+        <AdvancedSearch
+          onSearch={handleAdvancedSearch}
+          placeholder="꿈에 대해 자연어로 물어보세요 (예: 무서운 꿈, 큰 뱀 꿈)"
+          showRecommendations={true}
+        />
+      </div>
 
-        {!searchQuery && (
+      {/* 카테고리 필터 (검색 모드가 아닐 때만 표시) */}
+      {!isSearchMode && (
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4" />
@@ -143,10 +140,10 @@ export default function DreamDictionary() {
           </div>
         )}
 
-        {searchQuery && (
+        {isSearchMode && (
           <div className="text-center">
             <p className="text-muted-foreground">
-              "{searchQuery}" 검색 결과: {displayDreams?.length || 0}개
+              검색 결과: {displayDreams?.length || 0}개
             </p>
             <Button variant="ghost" size="sm" onClick={clearSearch} className="mt-2">
               검색 초기화
