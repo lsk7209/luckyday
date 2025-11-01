@@ -26,6 +26,40 @@ import {
   Target,
 } from 'lucide-react';
 
+// 최근 활동 데이터
+const recentActivityData = [
+  {
+    type: 'dream_added',
+    message: '새 꿈 심볼 "용 꿈" 추가됨',
+    time: '1시간 전',
+    status: 'success',
+  },
+  {
+    type: 'ai_interpretation',
+    message: 'AI 해몽 45회 수행됨',
+    time: '2시간 전',
+    status: 'success',
+  },
+  {
+    type: 'seo_indexed',
+    message: '꿈 페이지 12개 색인됨',
+    time: '4시간 전',
+    status: 'success',
+  },
+  {
+    type: 'user_search',
+    message: '"뱀 꿈" 검색 급증 (+23%)',
+    time: '6시간 전',
+    status: 'info',
+  },
+  {
+    type: 'content_updated',
+    message: '인기 꿈 심볼 순위 업데이트됨',
+    time: '1일 전',
+    status: 'success',
+  },
+];
+
 // 임시 데이터 - 실제로는 API에서 가져올 예정
 const metrics = {
   overview: {
@@ -98,38 +132,7 @@ const metrics = {
   },
     sitemapLastUpdated: new Date('2024-01-31T08:30:00'),
   },
-  recentActivity: [
-    {
-      type: 'dream_added',
-      message: '새 꿈 심볼 "용 꿈" 추가됨',
-      time: '1시간 전',
-      status: 'success',
-    },
-    {
-      type: 'ai_interpretation',
-      message: 'AI 해몽 45회 수행됨',
-      time: '2시간 전',
-      status: 'success',
-    },
-    {
-      type: 'seo_indexed',
-      message: '꿈 페이지 12개 색인됨',
-      time: '4시간 전',
-      status: 'success',
-    },
-    {
-      type: 'user_search',
-      message: '"뱀 꿈" 검색 급증 (+23%)',
-      time: '6시간 전',
-      status: 'info',
-    },
-    {
-      type: 'content_updated',
-      message: '인기 꿈 심볼 순위 업데이트됨',
-      time: '1일 전',
-      status: 'success',
-    },
-  ],
+  recentActivity: recentActivityData,
 };
 
 export default function AdminDashboard() {

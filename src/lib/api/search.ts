@@ -3,7 +3,7 @@
  * 통합 검색 기능
  */
 
-import { apiClient } from './api-client';
+// import { apiClient } from './api-client';
 import { Content } from '@/types/content';
 
 // 타입 정의

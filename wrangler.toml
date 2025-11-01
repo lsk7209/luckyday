@@ -82,14 +82,10 @@ max_age = 86400
 # Content Security Policy, HSTS, etc.
 
 # =================================================================
-# Cloudflare Pages 설정
+# Cloudflare Pages 설정 (삭제됨 - wrangler.toml에서는 설정하지 않음)
 # =================================================================
-
-[pages_build_output_dir] = "out"
-[pages_build_config]
-build_command = "npm run build"
-destination_dir = "out"
-root_dir = "."
+# Cloudflare Pages에서는 대시보드에서 직접 설정하거나
+# pages_build_config를 사용하지 않습니다.
 
 # =================================================================
 # 모니터링 및 로깅
