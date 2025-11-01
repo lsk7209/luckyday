@@ -70,9 +70,7 @@ export function AdvancedSearch({
 
     try {
       // Workers API 직접 호출 (API Routes 대신 - output: 'export' 모드에서는 API Routes가 작동하지 않음)
-      const { getWorkersApiUrl } = await import('@/lib/workers-api-url');
       const WORKERS_API_URL = getWorkersApiUrl();
-      
       const response = await fetch(`${WORKERS_API_URL}/api/dream/search?q=${encodeURIComponent(input)}&limit=5&autocomplete=true`);
       const data = await response.json();
 
