@@ -10,6 +10,9 @@ import { Menu, X, Search, Moon, Sparkles, BookOpen, Bookmark } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useBookmarks } from '@/components/bookmark';
+import { ThemeToggleSimple } from '@/components/theme-toggle';
+import { NotificationSystem } from '@/components/notification-system';
+import { LanguageToggle } from '@/components/language-selector';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,6 +65,15 @@ export default function Header() {
 
         {/* Search and Mobile Menu */}
         <div className="flex items-center space-x-4">
+          {/* Notifications */}
+          <NotificationSystem />
+
+          {/* Language Toggle */}
+          <LanguageToggle />
+
+          {/* Theme Toggle */}
+          <ThemeToggleSimple />
+
           {/* Search */}
           <form onSubmit={handleSearch} className="hidden sm:flex items-center space-x-2">
             <div className="relative">

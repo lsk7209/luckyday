@@ -13,6 +13,7 @@ import FAQAccordion from '@/components/shared/faq-accordion';
 import RelatedList from '@/components/shared/related-list';
 import AdSlot from '@/components/shared/ad-slot';
 import { BookmarkButton } from '@/components/bookmark';
+import { DreamShare } from '@/components/social-share';
 import { dreamDb } from '@/lib/supabase-client';
 import { DreamSymbol, DreamPageProps } from '@/types/dream';
 
@@ -289,16 +290,23 @@ export default async function DreamPage({ params }: DreamPageProps) {
             ))}
           </div>
 
-          {/* 북마크 버튼 */}
+          {/* 북마크 및 공유 버튼 */}
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="text-sm text-muted-foreground">
               이 꿈 해석이 도움이 되셨나요?
             </div>
-            <BookmarkButton
-              dreamSlug={dream.slug}
-              dreamName={dream.name}
-              showText={true}
-            />
+            <div className="flex items-center gap-3">
+              <DreamShare
+                dreamName={dream.name}
+                dreamSummary={dream.summary}
+                dreamSlug={dream.slug}
+              />
+              <BookmarkButton
+                dreamSlug={dream.slug}
+                dreamName={dream.name}
+                showText={true}
+              />
+            </div>
           </div>
 
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">

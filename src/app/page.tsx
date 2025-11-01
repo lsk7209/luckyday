@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { PersonalizedRecommendations } from '@/components/personalized-recommendations';
 import { dreamDb } from '@/lib/supabase-client';
 import { DreamSymbol } from '@/types/dream';
 
@@ -183,6 +184,11 @@ export default function Home() {
             )}
           </div>
         )}
+      </section>
+
+      {/* Personalized Recommendations */}
+      <section className="py-12">
+        <PersonalizedRecommendations limit={4} />
       </section>
 
       {/* AI Features */}
