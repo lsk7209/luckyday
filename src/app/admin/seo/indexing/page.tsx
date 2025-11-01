@@ -154,8 +154,9 @@ export default function IndexingManagement() {
   };
 
   const handleBulkSubmit = async (provider: string) => {
+    const statusKey = `${provider}Status` as keyof typeof indexingData[0];
     const urls = indexingData
-      .filter(item => item[`${provider}Status`] !== 'indexed')
+      .filter(item => item[statusKey] !== 'indexed')
       .map(item => item.url);
 
     if (urls.length === 0) {
