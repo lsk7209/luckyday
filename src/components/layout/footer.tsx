@@ -68,7 +68,6 @@ export default function Footer() {
                     <Link
                       href={link.href}
                       className="flex items-center space-x-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
                     >
                       {link.icon && <link.icon className="h-3 w-3" />}
                       <span>{link.name}</span>
