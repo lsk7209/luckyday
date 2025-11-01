@@ -61,6 +61,7 @@ export interface RelatedContent {
   title: string;
   type: ContentType;
   similarity: number; // 유사도 점수 (0-1)
+  summary?: string; // 요약 (선택사항)
 }
 
 // 가이드 단계
