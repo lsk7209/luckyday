@@ -49,45 +49,47 @@ export default function Home() {
   ];
 
   return (
-    <div className="space-y-12 py-8">
+    <div className="space-y-8 md:space-y-12 py-6 md:py-8">
       {/* Hero Section */}
-      <section className="text-center space-y-6 py-12">
-        <div className="flex items-center justify-center space-x-2 text-primary mb-4">
-          <Moon className="h-8 w-8" />
-          <Sparkles className="h-6 w-6" />
+      <section className="text-center space-y-4 md:space-y-6 py-8 md:py-12 px-4">
+        <div className="flex items-center justify-center space-x-2 text-primary mb-2 md:mb-4">
+          <Moon className="h-6 w-6 md:h-8 md:w-8" />
+          <Sparkles className="h-5 w-5 md:h-6 md:w-6" />
         </div>
 
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
           꿈의 의미를
-          <br />
+          <br className="md:hidden" />
+          <span className="hidden md:inline"> </span>
           <span className="text-primary">AI와 함께</span> 풀어보세요
         </h1>
 
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-2">
           심리학, 문화, 상징학을 바탕으로 한 정확한 꿈 해몽.
+          <br className="hidden sm:inline" />
           5,000개 이상의 꿈 사전과 AI 분석으로 당신의 꿈을解读합니다.
         </p>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="max-w-md mx-auto relative">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <form onSubmit={handleSearch} className="max-w-md mx-auto relative w-full px-4">
+          <Search className="absolute left-7 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             placeholder="꿈에 나온 것을 검색하세요..."
-            className="pl-10 h-12 text-base"
+            className="pl-10 h-12 md:h-14 text-base md:text-lg w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </form>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" asChild>
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
+          <Button size="lg" className="w-full sm:w-auto" asChild>
             <Link href="/ai">
               <Brain className="mr-2 h-5 w-5" />
               AI 해몽하기
             </Link>
           </Button>
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
             <Link href="/dream">
               <BookOpen className="mr-2 h-5 w-5" />
               꿈 사전 보기
@@ -97,19 +99,19 @@ export default function Home() {
       </section>
 
       {/* Popular Keywords */}
-      <section className="space-y-6">
+      <section className="space-y-4 md:space-y-6 px-4">
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-2">인기 꿈 키워드</h2>
-          <p className="text-muted-foreground">많이 검색되는 꿈들의 의미를 확인하세요</p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">인기 꿈 키워드</h2>
+          <p className="text-sm md:text-base text-muted-foreground">많이 검색되는 꿈들의 의미를 확인하세요</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4 max-w-4xl mx-auto">
           {popularKeywords.map((keyword) => (
             <Link key={keyword.slug} href={`/dream/${keyword.slug}`}>
-              <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl mb-2">{keyword.icon}</div>
-                  <h3 className="font-medium text-sm">{keyword.name}</h3>
+              <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer h-full">
+                <CardContent className="p-3 md:p-4 text-center flex flex-col items-center justify-center min-h-[80px] md:min-h-[100px]">
+                  <div className="text-xl md:text-2xl mb-1 md:mb-2">{keyword.icon}</div>
+                  <h3 className="font-medium text-xs md:text-sm leading-tight">{keyword.name}</h3>
                 </CardContent>
               </Card>
             </Link>
@@ -118,10 +120,10 @@ export default function Home() {
       </section>
 
       {/* Popular Dreams */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold">인기 꿈 해몽</h2>
-          <Button variant="ghost" asChild>
+      <section className="space-y-4 md:space-y-6 px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 className="text-2xl md:text-3xl font-bold">인기 꿈 해몽</h2>
+          <Button variant="ghost" size="sm" className="self-start sm:self-auto" asChild>
             <Link href="/dream">전체 보기</Link>
           </Button>
         </div>

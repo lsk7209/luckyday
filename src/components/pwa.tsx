@@ -47,21 +47,33 @@ export function PWAInstallPrompt() {
           })
           .catch((error) => {
             console.error('[PWA] 서비스 워커 등록 실패:', error);
+            // PWA 기능이 작동하지 않을 수 있지만 앱은 계속 작동함
+            console.warn('[PWA] 오프라인 기능 및 캐싱이 제한될 수 있습니다.');
           });
       });
     }
 
     // PWA 설치 프롬프트 이벤트 리스너
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setShowInstallPrompt(true);
+      try {
+        e.preventDefault();
+        setDeferredPrompt(e as BeforeInstallPromptEvent);
+        setShowInstallPrompt(true);
 
-      // 3일간 보지 않기로 설정한 경우 제외
-      const dismissedUntil = localStorage.getItem('pwa-dismissed-until');
-      if (dismissedUntil && Date.now() < parseInt(dismissedUntil)) {
+        // 3일간 보지 않기로 설정한 경우 제외
+        try {
+          const dismissedUntil = localStorage.getItem('pwa-dismissed-until');
+          if (dismissedUntil && Date.now() < parseInt(dismissedUntil)) {
+            setShowInstallPrompt(false);
+            return;
+          }
+        } catch (error) {
+          // localStorage가 지원되지 않는 환경
+          console.warn('[PWA] localStorage 접근 불가');
+        }
+      } catch (error) {
+        console.error('[PWA] 설치 프롬프트 처리 중 오류:', error);
         setShowInstallPrompt(false);
-        return;
       }
     };
 
@@ -94,7 +106,7 @@ export function PWAInstallPrompt() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [toast]);
+  }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -114,14 +126,21 @@ export function PWAInstallPrompt() {
       setShowInstallPrompt(false);
     } catch (error) {
       console.error('[PWA] 설치 중 오류:', error);
+      // 사용자에게 에러 표시 (toast 없이)
+      alert('앱 설치 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
 
   const handleDismiss = () => {
     setShowInstallPrompt(false);
     // 3일간 다시 보지 않기
-    const threeDaysFromNow = Date.now() + (3 * 24 * 60 * 60 * 1000);
-    localStorage.setItem('pwa-dismissed-until', threeDaysFromNow.toString());
+    try {
+      const threeDaysFromNow = Date.now() + (3 * 24 * 60 * 60 * 1000);
+      localStorage.setItem('pwa-dismissed-until', threeDaysFromNow.toString());
+    } catch (error) {
+      // localStorage가 지원되지 않는 환경
+      console.warn('[PWA] localStorage 접근 불가 - 설치 프롬프트 숨김 유지 불가');
+    }
   };
 
   // 설치 불가능한 환경이거나 이미 설치됨
@@ -217,8 +236,12 @@ export function usePWAStatus() {
     window.addEventListener('offline', handleOffline);
 
     // PWA 설치 상태 확인
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
+    try {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true);
+      }
+    } catch (error) {
+      console.warn('[PWA] display-mode 확인 실패:', error);
     }
 
     // 서비스 워커 업데이트 감지

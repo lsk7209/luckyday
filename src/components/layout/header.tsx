@@ -75,12 +75,12 @@ export default function Header() {
           <ThemeToggleSimple />
 
           {/* Search */}
-          <form onSubmit={handleSearch} className="hidden sm:flex items-center space-x-2">
+          <form onSubmit={handleSearch} className="hidden lg:flex items-center space-x-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="검색..."
+                placeholder="꿈 심볼 검색..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-64 pl-9"
@@ -124,18 +124,20 @@ export default function Header() {
               ))}
 
               {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="sm:hidden pt-4 border-t">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="검색..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </form>
+              <div className="lg:hidden pt-4 border-t">
+                <form onSubmit={handleSearch} className="space-y-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="꿈 심볼 검색..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 w-full"
+                    />
+                  </div>
+                </form>
+              </div>
             </nav>
           </div>
         </div>

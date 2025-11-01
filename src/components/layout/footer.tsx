@@ -1,19 +1,18 @@
 /**
  * Footer 컴포넌트
- * @description 사이트 푸터 및 링크 모음
+ * @description DreamScope 사이트 푸터 및 링크 모음
  */
 import Link from 'next/link';
-import { Calculator, BookOpen, FileText, Search, Github, Twitter } from 'lucide-react';
+import { Moon, Brain, BookOpen, FileText, Search, Github, Twitter, Mail } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const footerLinks = {
     서비스: [
-      { name: '계산기', href: '/utility', icon: Calculator },
-      { name: '가이드', href: '/guide', icon: BookOpen },
-      { name: '블로그', href: '/blog', icon: FileText },
-      { name: '통합 검색', href: '/search', icon: Search },
+      { name: '꿈 사전', href: '/dream', icon: BookOpen },
+      { name: 'AI 해몽', href: '/ai', icon: Brain },
+      { name: '북마크', href: '/bookmarks', icon: Search },
     ],
     회사: [
       { name: '소개', href: '/about' },
@@ -21,10 +20,10 @@ export default function Footer() {
       { name: '이용약관', href: '/terms' },
       { name: '문의하기', href: '/contact' },
     ],
-    개발자: [
-      { name: 'API 문서', href: '/api-docs' },
-      { name: '개발자 가이드', href: '/developer' },
-      { name: 'GitHub', href: 'https://github.com', icon: Github, external: true },
+    리소스: [
+      { name: '꿈 심리학', href: '/psychology' },
+      { name: '꿈 상징학', href: '/symbolism', icon: FileText },
+      { name: '꿈 통계', href: '/statistics' },
     ],
   };
 
@@ -35,11 +34,11 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Calculator className="h-6 w-6" />
-              <span className="font-bold text-lg">CMS Calculator</span>
+              <Moon className="h-6 w-6 text-primary" />
+              <span className="font-bold text-lg">DreamScope</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs">
-              워드프레스보다 빠르고, 자동으로 색인되는 생활형 계산기 CMS 솔루션
+              AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读
             </p>
             <div className="flex space-x-2">
               <Link
@@ -84,12 +83,12 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} CMS Calculator. All rights reserved.
+              © {currentYear} DreamScope. All rights reserved.
             </p>
             <div className="flex items-center space-x-4 text-sm text-muted-foreground">
               <span>Powered by Next.js & Cloudflare</span>
               <span>•</span>
-              <span>v5.0</span>
+              <span>v1.0</span>
             </div>
           </div>
         </div>

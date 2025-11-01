@@ -3,10 +3,15 @@
  */
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// 환경 변수가 설정되지 않은 경우 로컬 개발용 더미 값 사용
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://demo.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'demo-anon-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false // 로컬 개발에서는 세션 유지하지 않음
+  }
+});
 
 // DreamScope 관련 데이터베이스 함수들
 export const dreamDb = {
@@ -34,20 +39,81 @@ export const dreamDb = {
     offset?: number;
     orderBy?: 'popularity' | 'name' | 'last_updated';
   }) {
-    let query = supabase
-      .from('dream_symbol')
-      .select('*')
-      .range(offset, offset + limit - 1);
+    try {
+      let query = supabase
+        .from('dream_symbol')
+        .select('*')
+        .range(offset, offset + limit - 1);
 
-    if (category) {
-      query = query.eq('category', category);
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      query = query.order(orderBy, { ascending: orderBy === 'name' });
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.warn('[Supabase] 꿈 심볼 목록 조회 실패, 로컬 개발용 더미 데이터 사용:', error);
+
+      // 로컬 개발용 더미 데이터
+      const dummyDreams = [
+        {
+          id: 1,
+          slug: 'snake-dream',
+          name: '뱀 꿈',
+          category: 'animal',
+          summary: '뱀 꿈은 변화, 재생, 또는 잠재적 위협을 상징합니다.',
+          description: '뱀 꿈은 긍정적 또는 부정적으로 해석될 수 있습니다.',
+          tags: ['변화', '재생', '위협', '지혜'],
+          popularity: 95,
+          last_updated: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          slug: 'water-dream',
+          name: '물 꿈',
+          category: 'natural',
+          summary: '물 꿈은 감정, 무의식, 또는 삶의 흐름을 상징합니다.',
+          description: '물의 상태에 따라 꿈의 의미가 달라집니다.',
+          tags: ['감정', '무의식', '정화', '생명'],
+          popularity: 88,
+          last_updated: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 3,
+          slug: 'flying-dream',
+          name: '나는 꿈',
+          category: 'action',
+          summary: '나는 꿈은 자유, 해방, 또는 야망을 상징합니다.',
+          description: '하늘을 나는 꿈은 긍정적인 의미를 가집니다.',
+          tags: ['자유', '해방', '야망', '성취'],
+          popularity: 82,
+          last_updated: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        }
+      ];
+
+      // 카테고리 필터링
+      let filtered = dummyDreams;
+      if (category) {
+        filtered = dummyDreams.filter(dream => dream.category === category);
+      }
+
+      // 정렬
+      filtered.sort((a, b) => {
+        if (orderBy === 'name') {
+          return a.name.localeCompare(b.name);
+        }
+        return b.popularity - a.popularity; // popularity desc
+      });
+
+      // 페이징
+      return filtered.slice(offset, offset + limit);
     }
-
-    query = query.order(orderBy, { ascending: orderBy === 'name' });
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
   },
 
   // 검색어로 꿈 심볼 검색
