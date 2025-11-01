@@ -132,10 +132,8 @@ let metrics = {
   },
     sitemapLastUpdated: new Date('2024-01-31T08:30:00'),
   },
+  recentActivity: recentActivityData,
 };
-
-// recentActivity 추가
-metrics.recentActivity = recentActivityData;
 
 export default function AdminDashboard() {
   return (
