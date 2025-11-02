@@ -74,16 +74,38 @@ export const workersDreamDb = {
       if (params.offset) queryParams.append('offset', params.offset.toString());
       if (params.orderBy) queryParams.append('orderBy', params.orderBy);
 
-      const response = await fetch(`${WORKERS_API_URL}/api/dream?${queryParams}`);
+      const apiUrl = `${WORKERS_API_URL}/api/dream?${queryParams}`;
+      console.log('[Workers API] 꿈 목록 요청:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
       if (!response.ok) {
-        throw new Error(`Failed to fetch dreams: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('[Workers API] 응답 오류:', response.status, errorText);
+        throw new Error(`API 오류 (${response.status}): ${response.statusText}`);
       }
+      
       const data = await response.json();
-      const dreams = data.success ? (data.dreams || []) : [];
+      console.log('[Workers API] 응답 데이터:', { success: data.success, count: data.dreams?.length || 0 });
+      
+      if (!data.success) {
+        console.warn('[Workers API] API가 실패를 반환했습니다:', data.error || '알 수 없는 오류');
+        return [];
+      }
+      
+      const dreams = data.dreams || [];
+      if (dreams.length === 0) {
+        console.warn('[Workers API] 빈 데이터 배열을 받았습니다.');
+      }
+      
       return dreams.map(convertDreamSymbol);
     } catch (error) {
       console.error('[Workers API] 꿈 심볼 목록 조회 실패:', error);
-      return [];
+      throw error; // 상위에서 처리할 수 있도록 에러를 다시 throw
     }
   },
 

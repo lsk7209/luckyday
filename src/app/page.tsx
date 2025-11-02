@@ -42,13 +42,32 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // 인기 꿈 심볼 조회
-  const { data: popularDreams, isLoading: dreamsLoading } = useQuery({
+  const { data: popularDreams, isLoading: dreamsLoading, error: dreamsError } = useQuery({
     queryKey: ['popular-dreams'],
-    queryFn: () => workersDreamDb.getDreamSymbols({
-      limit: 6,
-      orderBy: 'popularity'
-    }),
+    queryFn: async () => {
+      try {
+        const dreams = await workersDreamDb.getDreamSymbols({
+          limit: 6,
+          orderBy: 'popularity'
+        });
+        
+        // API에서 데이터가 없을 경우 인기 키워드 기반으로 폴백 데이터 생성
+        if (!dreams || dreams.length === 0) {
+          console.warn('[Home] API에서 꿈 데이터를 가져오지 못했습니다. 폴백 데이터를 사용합니다.');
+          return createFallbackDreams();
+        }
+        
+        console.log('[Home] 꿈 데이터 로드 성공:', dreams.length, '개');
+        return dreams;
+      } catch (error) {
+        console.error('[Home] 꿈 데이터 조회 실패:', error);
+        // 에러 발생 시에도 폴백 데이터 반환하여 UI가 깨지지 않도록 함
+        return createFallbackDreams();
+      }
+    },
     staleTime: 10 * 60 * 1000, // 10분
+    retry: 2,
+    retryDelay: 1000,
   });
 
   // 검색 처리
