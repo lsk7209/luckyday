@@ -202,7 +202,7 @@ export default function DreamDictionary() {
         <div className="text-center py-12">
           <p className="text-red-500 mb-4">데이터를 불러오는 중 오류가 발생했습니다.</p>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            {error instanceof Error ? error.message : '알 수 없는 오류'}
+            {(error as Error)?.message || String(error) || '알 수 없는 오류'}
           </p>
           <Button 
             onClick={() => window.location.reload()} 
@@ -322,7 +322,7 @@ export default function DreamDictionary() {
               <p>• 로딩 중: {isLoading ? '예' : '아니오'}</p>
               {error && (
                 <p className="text-red-600 dark:text-red-400 mt-2">
-                  에러: {error instanceof Error ? error.message : String(error)}
+                  에러: {(error as Error)?.message || String(error)}
                 </p>
               )}
               {!isLoading && !error && (
@@ -389,7 +389,7 @@ export default function DreamDictionary() {
                 <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-left text-xs max-w-md mx-auto">
                   <p className="font-semibold text-red-600 dark:text-red-400">에러:</p>
                   <p className="text-red-500 dark:text-red-400">
-                    {error instanceof Error ? error.message : String(error)}
+                    {(error as Error)?.message || String(error)}
                   </p>
                 </div>
               )}

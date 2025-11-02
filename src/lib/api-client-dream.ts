@@ -118,7 +118,7 @@ export const workersDreamDb = {
           console.log('[Workers API] 데이터 없음 (limit이 0이거나 미지정)');
         }
       } else {
-        console.log('[Workers API] 받은 꿈 목록:', dreams.slice(0, 5).map(d => ({ 
+        console.log('[Workers API] 받은 꿈 목록:', dreams.slice(0, 5).map((d: any) => ({ 
           slug: d.slug, 
           name: d.name, 
           category: d.category 
