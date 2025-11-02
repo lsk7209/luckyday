@@ -105,12 +105,12 @@ export function createDreamDb(db: D1Database) {
       query += ` ${orderByClause} LIMIT ? OFFSET ?`;
       params.push(limit, offset);
 
-      const statement = db.prepare(query);
-      for (let i = 0; i < params.length; i++) {
-        statement.bind(params[i]);
-      }
-
-      const result = await statement.all<DreamSymbol>();
+      // D1에서는 모든 파라미터를 한 번에 bind해야 함
+      const result = await db
+        .prepare(query)
+        .bind(...params)
+        .all<DreamSymbol>();
+      
       return result.results || [];
     },
 

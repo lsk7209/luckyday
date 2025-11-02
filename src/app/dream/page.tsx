@@ -96,22 +96,36 @@ export default function DreamDictionary() {
   const { data: allDreamsData, isLoading, error } = useQuery({
     queryKey: ['dream-symbols-all', selectedCategory, selectedInitial, sortBy],
     queryFn: async () => {
-      const allDreams = await workersDreamDb.getDreamSymbols({
-        category: selectedCategory === 'all' ? undefined : selectedCategory,
-        limit: 1000, // 초성 필터를 위해 충분한 데이터 가져오기
-        orderBy: sortBy
-      });
-      
-      // 한글 초성 필터 적용
-      let filtered = allDreams;
-      if (selectedInitial !== '전체') {
-        filtered = allDreams.filter(dream => {
-          const initial = getKoreanInitial(dream.name);
-          return initial === selectedInitial;
+      try {
+        console.log('[Dream Dictionary] 요청 파라미터:', {
+          category: selectedCategory === 'all' ? undefined : selectedCategory,
+          sortBy,
+          initial: selectedInitial
         });
+        
+        const allDreams = await workersDreamDb.getDreamSymbols({
+          category: selectedCategory === 'all' ? undefined : selectedCategory,
+          limit: 1000, // 초성 필터를 위해 충분한 데이터 가져오기
+          orderBy: sortBy
+        });
+        
+        console.log('[Dream Dictionary] 받은 데이터 개수:', allDreams.length);
+        
+        // 한글 초성 필터 적용
+        let filtered = allDreams;
+        if (selectedInitial !== '전체') {
+          filtered = allDreams.filter(dream => {
+            const initial = getKoreanInitial(dream.name);
+            return initial === selectedInitial;
+          });
+          console.log('[Dream Dictionary] 초성 필터 적용 후:', filtered.length);
+        }
+        
+        return filtered;
+      } catch (error) {
+        console.error('[Dream Dictionary] 데이터 조회 실패:', error);
+        return [];
       }
-      
-      return filtered;
     },
   });
 
@@ -167,10 +181,21 @@ export default function DreamDictionary() {
 
   // 에러 상태
   if (error) {
+    console.error('[Dream Dictionary] 에러:', error);
     return (
       <div className="flex flex-col gap-8 py-8 md:py-12 px-4 sm:px-6">
         <div className="text-center py-12">
-          <p className="text-red-500">데이터를 불러오는 중 오류가 발생했습니다.</p>
+          <p className="text-red-500 mb-4">데이터를 불러오는 중 오류가 발생했습니다.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            {error instanceof Error ? error.message : '알 수 없는 오류'}
+          </p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="mt-4"
+            variant="outline"
+          >
+            새로고침
+          </Button>
         </div>
       </div>
     );

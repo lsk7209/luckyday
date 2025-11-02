@@ -90,7 +90,12 @@ export const workersDreamDb = {
       }
       
       const data = await response.json();
-      console.log('[Workers API] 응답 데이터:', { success: data.success, count: data.dreams?.length || 0 });
+      console.log('[Workers API] 응답 데이터:', { 
+        success: data.success, 
+        count: data.dreams?.length || 0,
+        category: params.category,
+        orderBy: params.orderBy
+      });
       
       if (!data.success) {
         console.warn('[Workers API] API가 실패를 반환했습니다:', data.error || '알 수 없는 오류');
@@ -98,8 +103,12 @@ export const workersDreamDb = {
       }
       
       const dreams = data.dreams || [];
-      if (dreams.length === 0) {
-        console.warn('[Workers API] 빈 데이터 배열을 받았습니다.');
+      if (dreams.length === 0 && params.limit && params.limit > 0) {
+        console.warn('[Workers API] 빈 데이터 배열을 받았습니다.', {
+          category: params.category,
+          limit: params.limit,
+          offset: params.offset
+        });
       }
       
       return dreams.map(convertDreamSymbol);
