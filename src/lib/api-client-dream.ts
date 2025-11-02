@@ -103,12 +103,26 @@ export const workersDreamDb = {
       }
       
       const dreams = data.dreams || [];
-      if (dreams.length === 0 && params.limit && params.limit > 0) {
-        console.warn('[Workers API] 빈 데이터 배열을 받았습니다.', {
-          category: params.category,
-          limit: params.limit,
-          offset: params.offset
-        });
+      
+      // 데이터가 없을 때 상세 로그
+      if (dreams.length === 0) {
+        if (params.limit && params.limit > 0) {
+          console.warn('[Workers API] 빈 데이터 배열을 받았습니다.', {
+            category: params.category || '모든 카테고리',
+            limit: params.limit,
+            offset: params.offset,
+            orderBy: params.orderBy,
+            apiUrl
+          });
+        } else {
+          console.log('[Workers API] 데이터 없음 (limit이 0이거나 미지정)');
+        }
+      } else {
+        console.log('[Workers API] 받은 꿈 목록:', dreams.slice(0, 5).map(d => ({ 
+          slug: d.slug, 
+          name: d.name, 
+          category: d.category 
+        })));
       }
       
       return dreams.map(convertDreamSymbol);

@@ -111,6 +111,14 @@ export default function DreamDictionary() {
         
         console.log('[Dream Dictionary] 받은 데이터 개수:', allDreams.length);
         
+        if (allDreams.length > 0) {
+          console.log('[Dream Dictionary] 샘플 데이터:', allDreams.slice(0, 3).map(d => ({
+            slug: d.slug,
+            name: d.name,
+            category: d.category
+          })));
+        }
+        
         // 한글 초성 필터 적용
         let filtered = allDreams;
         if (selectedInitial !== '전체') {
@@ -119,6 +127,13 @@ export default function DreamDictionary() {
             return initial === selectedInitial;
           });
           console.log('[Dream Dictionary] 초성 필터 적용 후:', filtered.length);
+          if (filtered.length > 0) {
+            console.log('[Dream Dictionary] 필터링된 샘플:', filtered.slice(0, 3).map(d => ({
+              slug: d.slug,
+              name: d.name,
+              initial: getKoreanInitial(d.name)
+            })));
+          }
         }
         
         return filtered;
@@ -296,6 +311,32 @@ export default function DreamDictionary() {
 
       {/* 카드 그리드 */}
       <div className="px-4 sm:px-6">
+        {/* 디버깅 정보 (데이터가 없을 때 표시) */}
+        {(!allDreamsData || allDreamsData.length === 0) && (
+          <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+            <p className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">⚠️ 데이터가 표시되지 않습니다</p>
+            <div className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1">
+              <p>• 전체 데이터: {allDreamsData?.length || 0}개</p>
+              <p>• 선택된 카테고리: {selectedCategory}</p>
+              <p>• 선택된 초성: {selectedInitial}</p>
+              <p>• 로딩 중: {isLoading ? '예' : '아니오'}</p>
+              {error && (
+                <p className="text-red-600 dark:text-red-400 mt-2">
+                  에러: {error instanceof Error ? error.message : String(error)}
+                </p>
+              )}
+              {!isLoading && !error && (
+                <div className="mt-3 p-3 bg-white dark:bg-slate-900 rounded border border-yellow-300 dark:border-yellow-700">
+                  <p className="font-semibold mb-1">해결 방법:</p>
+                  <p>1. Cloudflare Dashboard에서 원격 데이터베이스에 SQL 파일 실행</p>
+                  <p>2. 브라우저 콘솔에서 API 응답 확인</p>
+                  <p>3. 카테고리 필터를 '전체'로 변경하여 테스트</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {dreams && dreams.length > 0 ? (
             <>
@@ -332,9 +373,26 @@ export default function DreamDictionary() {
             </>
           ) : (
             <div className="col-span-full text-center py-12">
-              <p className="text-slate-500 dark:text-slate-400">
-                검색 결과가 없습니다.
+              <p className="text-slate-500 dark:text-slate-400 mb-2">
+                {allDreamsData && allDreamsData.length === 0 
+                  ? '등록된 꿈 해몽이 없습니다.' 
+                  : dreams.length === 0 && allDreamsData && allDreamsData.length > 0
+                  ? '이 페이지에 표시할 꿈이 없습니다.'
+                  : '검색 결과가 없습니다.'}
               </p>
+              {allDreamsData && allDreamsData.length === 0 && (
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                  카테고리나 초성 필터를 변경해보세요.
+                </p>
+              )}
+              {process.env.NODE_ENV === 'development' && error && (
+                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-left text-xs max-w-md mx-auto">
+                  <p className="font-semibold text-red-600 dark:text-red-400">에러:</p>
+                  <p className="text-red-500 dark:text-red-400">
+                    {error instanceof Error ? error.message : String(error)}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

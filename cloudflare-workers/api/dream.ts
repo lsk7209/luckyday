@@ -86,16 +86,41 @@ export async function getDreamSymbols(
   orderBy: 'popularity' | 'name' | 'last_updated' = 'popularity'
 ): Promise<Response> {
   try {
+    console.log('[API] getDreamSymbols 호출:', { category, limit, offset, orderBy });
+    
     const db = createDreamDb(env.DB);
     const dreams = await db.getDreamSymbols({ category, limit, offset, orderBy });
 
+    console.log('[API] 데이터베이스에서 받은 꿈 개수:', dreams.length);
+    if (dreams.length > 0) {
+      console.log('[API] 첫 번째 꿈 샘플:', {
+        slug: dreams[0]?.slug,
+        name: dreams[0]?.name,
+        category: dreams[0]?.category
+      });
+    }
+
     // JSON 문자열을 객체로 파싱
-    const parsedDreams = dreams.map(dream => ({
-      ...dream,
-      tags: JSON.parse(dream.tags || '[]'),
-      polarities: JSON.parse(dream.polarities || '{}'),
-      modifiers: JSON.parse(dream.modifiers || '{}')
-    }));
+    const parsedDreams = dreams.map(dream => {
+      try {
+        return {
+          ...dream,
+          tags: typeof dream.tags === 'string' ? JSON.parse(dream.tags || '[]') : (dream.tags || []),
+          polarities: typeof dream.polarities === 'string' ? JSON.parse(dream.polarities || '{}') : (dream.polarities || {}),
+          modifiers: typeof dream.modifiers === 'string' ? JSON.parse(dream.modifiers || '{}') : (dream.modifiers || {})
+        };
+      } catch (parseError) {
+        console.error('[API] JSON 파싱 오류:', parseError, dream);
+        return {
+          ...dream,
+          tags: [],
+          polarities: {},
+          modifiers: {}
+        };
+      }
+    });
+
+    console.log('[API] 파싱된 꿈 개수:', parsedDreams.length);
 
     return new Response(
       JSON.stringify({
@@ -108,11 +133,12 @@ export async function getDreamSymbols(
       }
     );
   } catch (error) {
-    console.error('Get dream symbols error:', error);
+    console.error('[API] Get dream symbols error:', error);
     return new Response(
       JSON.stringify({
         success: false,
         error: '꿈 목록을 불러오는 중 오류가 발생했습니다.',
+        errorDetails: error instanceof Error ? error.message : String(error),
         dreams: []
       }),
       {
