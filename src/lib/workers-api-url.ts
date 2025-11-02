@@ -23,13 +23,23 @@ export function getWorkersApiUrl(): string {
     const hostname = window.location.hostname;
     
     // Pages URL 패턴 감지 및 변환
-    // 예: luckyday-8k6.pages.dev -> luckyday-api-8k6.workers.dev
+    // 예: luckyday-8k6.pages.dev -> luckyday-api.workers.dev (wrangler.toml의 name 사용)
     const pagesMatch = hostname.match(/([a-z0-9-]+)\.pages\.dev$/);
     if (pagesMatch) {
       const projectName = pagesMatch[1];
-      // 프로젝트 이름에서 UUID 부분 제거 (예: luckyday-8k6 -> luckyday-api)
-      const baseName = projectName.replace(/-[a-z0-9]{4,}$/, '') || projectName;
-      return `https://${baseName}-api.workers.dev`;
+      // 프로젝트 이름에서 UUID 부분 제거하고 'api' 추가
+      // luckyday-8k6 -> luckyday-api
+      const baseName = projectName.replace(/-[a-z0-9]{4,}$/, '');
+      // Workers 이름은 wrangler.toml의 name 필드 기준으로 'luckyday-api' 사용
+      // 만약 프로젝트 이름에 UUID가 있다면 제거, 없으면 그대로 사용
+      if (baseName && baseName !== projectName) {
+        // UUID가 제거된 경우 (예: luckyday-8k6 -> luckyday)
+        return `https://${baseName}-api.workers.dev`;
+      } else {
+        // UUID가 없거나 패턴이 다른 경우 기본 이름 사용
+        // wrangler.toml의 name = "luckyday-api" 기준
+        return 'https://luckyday-api.workers.dev';
+      }
     }
     
     // 이미 workers.dev인 경우
@@ -49,8 +59,13 @@ export function getWorkersApiUrl(): string {
       const pagesMatch = hostname.match(/([a-z0-9-]+)\.pages\.dev$/);
       if (pagesMatch) {
         const projectName = pagesMatch[1];
-        const baseName = projectName.replace(/-[a-z0-9]{4,}$/, '') || projectName;
-        return `https://${baseName}-api.workers.dev`;
+        const baseName = projectName.replace(/-[a-z0-9]{4,}$/, '');
+        // wrangler.toml의 name = "luckyday-api" 기준으로 고정
+        if (baseName && baseName !== projectName) {
+          return `https://${baseName}-api.workers.dev`;
+        } else {
+          return 'https://luckyday-api.workers.dev';
+        }
       }
       
       return siteUrl
