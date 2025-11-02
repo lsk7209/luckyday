@@ -15,6 +15,7 @@ export interface DreamSymbol {
   polarities: Record<string, any>;
   modifiers: Record<string, any>;
   last_updated: string;
+  created_at?: string; // 옵셔널: 데이터베이스에서 제공될 수 있음
 }
 
 export interface DreamScenario {

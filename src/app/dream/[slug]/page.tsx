@@ -478,7 +478,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
 
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
-            <time dateTime={finalDream.last_updated || finalDream.created_at}>
+            <time dateTime={finalDream.last_updated || finalDream.created_at || new Date().toISOString()}>
               마지막 업데이트: {new Date(finalDream.last_updated || finalDream.created_at || Date.now()).toLocaleDateString('ko-KR')}
             </time>
           </div>
