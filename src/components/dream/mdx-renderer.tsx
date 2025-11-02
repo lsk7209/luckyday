@@ -113,11 +113,11 @@ export default function MDXRenderer({ content, className = '' }: MDXRendererProp
     });
 
     // 단락 변환 (이미 헤딩은 변환됨)
-    const lines = html.split('\n');
+    const paragraphLines = html.split('\n');
     let result: string[] = [];
     let currentParagraph: string[] = [];
 
-    lines.forEach((line) => {
+    paragraphLines.forEach((line) => {
       const trimmed = line.trim();
       
       // 섹션 시작/종료, HTML 태그는 그대로 유지

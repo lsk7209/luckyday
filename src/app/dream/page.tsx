@@ -10,17 +10,14 @@ import Link from 'next/link';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Flight, 
-  Tooth, 
+  Plane, 
+  Sparkles, 
   Droplets, 
-  Run, 
-  Web, 
+  Zap, 
+  Globe, 
   Home, 
   ArrowDown,
-  Plane,
-  Water,
   Activity,
-  Spider,
   Building
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,11 +34,11 @@ const getDreamIcon = (name: string, category: string) => {
   const nameLower = name.toLowerCase();
   
   // 특정 꿈에 대한 아이콘 매핑
-  if (nameLower.includes('flying') || nameLower.includes('비행')) return Flight;
-  if (nameLower.includes('teeth') || nameLower.includes('이빨') || nameLower.includes('치아')) return Tooth;
+  if (nameLower.includes('flying') || nameLower.includes('비행')) return Plane;
+  if (nameLower.includes('teeth') || nameLower.includes('이빨') || nameLower.includes('치아')) return Sparkles;
   if (nameLower.includes('water') || nameLower.includes('물')) return Droplets;
-  if (nameLower.includes('chase') || nameLower.includes('쫓김') || nameLower.includes('추격')) return Run;
-  if (nameLower.includes('spider') || nameLower.includes('거미')) return Web;
+  if (nameLower.includes('chase') || nameLower.includes('쫓김') || nameLower.includes('추격')) return Zap;
+  if (nameLower.includes('spider') || nameLower.includes('거미')) return Globe;
   if (nameLower.includes('house') || nameLower.includes('집') || nameLower.includes('home')) return Home;
   if (nameLower.includes('falling') || nameLower.includes('떨어짐') || nameLower.includes('낙하')) return ArrowDown;
   

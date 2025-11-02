@@ -6,7 +6,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, Pets, Smile, Building2, Palette } from 'lucide-react';
+import { Search, Heart, Smile, Building2, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,7 @@ const categories = [
   { 
     name: 'Animals', 
     description: 'Symbolic meanings', 
-    icon: Pets,
+    icon: Heart,
     href: '/dream?category=animal'
   },
   { 
