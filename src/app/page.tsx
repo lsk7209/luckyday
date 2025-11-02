@@ -38,6 +38,34 @@ const PersonalizedRecommendations = dynamic(
 import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol } from '@/types/dream';
 
+// 인기 키워드들 (컴포넌트 외부로 이동)
+const popularKeywords = [
+  { name: '뱀 꿈', slug: 'baem-snake-dream', icon: '🐍', category: 'animal' as const },
+  { name: '이빨 꿈', slug: 'tooth-loss-dream', icon: '🦷', category: 'body' as const },
+  { name: '피 꿈', slug: 'blood-dream', icon: '🩸', category: 'body' as const },
+  { name: '물 꿈', slug: 'water-dream', icon: '💧', category: 'element' as const },
+  { name: '돈 꿈', slug: 'money-dream', icon: '💰', category: 'object' as const },
+  { name: '집 꿈', slug: 'house-dream', icon: '🏠', category: 'place' as const },
+];
+
+// 폴백 꿈 데이터 생성 함수
+const createFallbackDreams = (): DreamSymbol[] => {
+  return popularKeywords.map(keyword => ({
+    id: keyword.slug,
+    slug: keyword.slug,
+    name: keyword.name,
+    category: keyword.category,
+    summary: `${keyword.name}에 대한 상세한 해몽을 확인해보세요.`,
+    quick_answer: `${keyword.name}의 의미를 궁금하시나요? 상세 페이지에서 확인하세요.`,
+    body_mdx: '',
+    tags: [keyword.name.replace(' 꿈', ''), '해몽', '꿈해석'],
+    popularity: 100,
+    polarities: {},
+    modifiers: {},
+    last_updated: new Date().toISOString(),
+  }));
+};
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -78,16 +106,6 @@ export default function Home() {
       window.location.href = `/dream?q=${encodeURIComponent(searchQuery.trim())}`;
     }
   };
-
-  // 인기 키워드들
-  const popularKeywords = [
-    { name: '뱀 꿈', slug: 'baem-snake-dream', icon: '🐍' },
-    { name: '이빨 꿈', slug: 'tooth-loss-dream', icon: '🦷' },
-    { name: '피 꿈', slug: 'blood-dream', icon: '🩸' },
-    { name: '물 꿈', slug: 'water-dream', icon: '💧' },
-    { name: '돈 꿈', slug: 'money-dream', icon: '💰' },
-    { name: '집 꿈', slug: 'house-dream', icon: '🏠' },
-  ];
 
   return (
     <div className="w-full space-y-12 md:space-y-16 lg:space-y-20 py-8 md:py-12 lg:py-16">
