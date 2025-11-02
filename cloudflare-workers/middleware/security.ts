@@ -39,11 +39,12 @@ export async function applySecurityHeaders(response: Response): Promise<Response
   // CSP (Content Security Policy)
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://*.googletagmanager.com https://*.google-analytics.com https://*.googlesyndication.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
     "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://api.indexnow.org https://www.google.com https://www.bing.com",
+    "connect-src 'self' https://api.indexnow.org https://www.google.com https://www.bing.com https://*.workers.dev https://*.googlesyndication.com https://*.googletagmanager.com https://*.google-analytics.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google",
+    "frame-src 'self' https://*.googlesyndication.com https://*.doubleclick.net https://googleads.g.doubleclick.net",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
