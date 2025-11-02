@@ -48,6 +48,8 @@
     "cf:dream:seed:all:local": "npm run cf:dream:schema:local && npm run cf:dream:seed:local && npm run cf:dream:seed:full:local && npm run cf:dream:seed:extended:local && npm run cf:dream:seed:viral:local && npm run cf:dream:seed:ultra:local && npm run cf:dream:seed:ultimate:local && npm run cf:dream:seed:mega:local && npm run cf:dream:seed:super:local && npm run cf:dream:seed:hyper:local",
     "cf:dream:seed:viral:local": "wrangler d1 execute luckyday-db --local --file=cloudflare-workers/dream-seed-viral-enriched.sql",
     "cf:dream:seed:ultra:local": "wrangler d1 execute luckyday-db --local --file=cloudflare-workers/dream-seed-viral-ultra.sql",
+    "cf:dream:seed:new": "wrangler d1 execute luckyday-db --file=cloudflare-workers/dream-seed-new-content.sql",
+    "cf:dream:seed:new:local": "wrangler d1 execute luckyday-db --local --file=cloudflare-workers/dream-seed-new-content.sql",
     "cf:tail": "wrangler tail",
     "cf:tail:staging": "wrangler tail --config wrangler.staging.toml",
     "cf:tail:prod": "wrangler tail --config wrangler.production.toml",
