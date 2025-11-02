@@ -18,17 +18,52 @@ export function getWorkersApiUrl(): string {
     return process.env.NEXT_PUBLIC_WORKERS_API_URL.replace(/\/$/, ''); // trailing slash 제거
   }
   
-  // 2. Pages URL에서 자동 변환
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
-    // 여러 패턴 지원: pages.dev, pages.cloudflare.dev 등
-    return siteUrl
-      .replace(/\.pages\.dev$/, '.workers.dev')
-      .replace(/\.pages\.cloudflare\.dev$/, '.workers.dev')
-      .replace(/luckyday\.pages/, 'luckyday-api.workers');
+  // 2. 브라우저 환경에서 현재 호스트 기반으로 자동 감지
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    
+    // Pages URL 패턴 감지 및 변환
+    // 예: luckyday-8k6.pages.dev -> luckyday-api-8k6.workers.dev
+    const pagesMatch = hostname.match(/([a-z0-9-]+)\.pages\.dev$/);
+    if (pagesMatch) {
+      const projectName = pagesMatch[1];
+      // 프로젝트 이름에서 UUID 부분 제거 (예: luckyday-8k6 -> luckyday-api)
+      const baseName = projectName.replace(/-[a-z0-9]{4,}$/, '') || projectName;
+      return `https://${baseName}-api.workers.dev`;
+    }
+    
+    // 이미 workers.dev인 경우
+    if (hostname.includes('.workers.dev')) {
+      return `https://${hostname}`;
+    }
   }
   
-  // 3. 기본값 (프로덕션)
+  // 3. 환경 변수에서 Pages URL 가져오기
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+    try {
+      const url = new URL(siteUrl);
+      const hostname = url.hostname;
+      
+      // Pages URL 패턴 감지
+      const pagesMatch = hostname.match(/([a-z0-9-]+)\.pages\.dev$/);
+      if (pagesMatch) {
+        const projectName = pagesMatch[1];
+        const baseName = projectName.replace(/-[a-z0-9]{4,}$/, '') || projectName;
+        return `https://${baseName}-api.workers.dev`;
+      }
+      
+      return siteUrl
+        .replace(/\.pages\.dev$/, '.workers.dev')
+        .replace(/\.pages\.cloudflare\.dev$/, '.workers.dev')
+        .replace(/luckyday\.pages/, 'luckyday-api.workers');
+    } catch {
+      // URL 파싱 실패 시 기본 처리
+    }
+  }
+  
+  // 4. 기본값 (프로덕션) - 실제 배포된 Workers URL로 수정 필요
+  console.warn('[Workers API] 기본 URL 사용 중. NEXT_PUBLIC_WORKERS_API_URL 환경 변수를 설정하세요.');
   return 'https://luckyday-api.workers.dev';
 }
 

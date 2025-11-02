@@ -76,12 +76,26 @@ export const workersDreamDb = {
 
       const apiUrl = `${WORKERS_API_URL}/api/dream?${queryParams}`;
       console.log('[Workers API] 꿈 목록 요청:', apiUrl);
+      console.log('[Workers API] 사용 중인 Workers URL:', WORKERS_API_URL);
       
-      const response = await fetch(apiUrl, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      let response: Response;
+      try {
+        response = await fetch(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // CORS 및 네트워크 오류 처리
+          mode: 'cors',
+          cache: 'no-cache',
+        });
+      } catch (fetchError) {
+        console.error('[Workers API] Fetch 오류:', fetchError);
+        // ERR_NAME_NOT_RESOLVED 등의 네트워크 오류 처리
+        if (fetchError instanceof TypeError && fetchError.message.includes('Failed to fetch')) {
+          throw new Error(`Workers API에 연결할 수 없습니다. URL을 확인하세요: ${WORKERS_API_URL}`);
+        }
+        throw fetchError;
+      }
       
       if (!response.ok) {
         const errorText = await response.text();
