@@ -4,16 +4,11 @@
  */
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Brain, TrendingUp, Clock, Tag } from 'lucide-react';
+import Image from 'next/image';
+import { Brain, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import TableOfContents from '@/components/shared/table-of-contents';
-import FAQAccordion from '@/components/shared/faq-accordion';
-import RelatedList from '@/components/shared/related-list';
+import { Card, CardContent } from '@/components/ui/card';
 import AdSlot from '@/components/shared/ad-slot';
-// import { BookmarkButton } from '@/components/bookmark';
-// import { DreamShare } from '@/components/social-share';
 import MDXRenderer from '@/components/dream/mdx-renderer';
 import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol, DreamPageProps } from '@/types/dream';
@@ -400,12 +395,11 @@ export default async function DreamPage({ params }: DreamPageProps) {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold mb-4">꿈을 찾을 수 없습니다</h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-slate-600 dark:text-slate-400 mb-6">
           요청하신 꿈 정보가 존재하지 않거나 삭제되었을 수 있습니다.
         </p>
         <Button asChild>
           <Link href="/dream">
-            <ArrowLeft className="mr-2 h-4 w-4" />
             꿈 사전으로 돌아가기
           </Link>
         </Button>
@@ -419,153 +413,184 @@ export default async function DreamPage({ params }: DreamPageProps) {
   // 관련 꿈 데이터 가져오기
   const relatedDreams = await fetchRelatedDreams(slug);
 
+  // Table of Contents 항목 추출
+  const tocItems = (finalDream.body_mdx || '').match(/^#{2,3} .+$/gm) || [];
+  const tocLinks = tocItems.map((heading) => {
+    const text = heading.replace(/^#+\s/, '');
+    const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').substring(0, 50);
+    return { text, id };
+  });
+
+  // 관련 꿈 이미지 매핑
+  const relatedDreamImages: Record<string, string> = {
+    'falling': 'https://lh3.googleusercontent.com/aida-public/AB6AXuAfXG-GhxORmv34F8GuTWDPac3V7Lx7EaIIbFmef2x8dsLJXlk4b9c0PFnO5FRr5VifXNVbxMKyhkriNJpajn4nnQ6Gs-z848Xl5KxRLwW8lwYwoWrk9o8C3pAHsyFo5YbBqhe2hxTQux0kfizh0j-znIVP0R7TVs_i1mFM0mAaZLh4JHa5HMbGg0myipz-klYvfuQgZ2CODqn1Zveo1n5YAmOr6hFWOUWfvs-9GVHKuYhKZoONQslDrgHI99Tc9WTLwG2GQeq9fEw',
+    'water': 'https://lh3.googleusercontent.com/aida-public/AB6AXuDqd75T24vVvAeCIK6ej9snJvsZ03oFd7LWPfM1zKJvCu9pI1he21xj03LoYNslMSoeX4bM8VwliJE2YPinjkFPKMsTc49qSzP9Bft8Xb0cVgdGQJySq_YLS_k6FKH5nBQ3vwYFP-Vd1TO795ckBD8gDWJx1-93MDdUTpPiJw5k6AE7NVdpkr1qaaVNFyKdbdDWMBsUZPVlXaJINnaiUX0n_w_s8nm3BO3D2eBeu-zPIw0_19PApNkS7-psnK0UzUOIyF99pASlz5c',
+    'being-chased': 'https://lh3.googleusercontent.com/aida-public/AB6AXuCZ8wese2S9VMQyu0cQtcPeLzFUu285-XAPfbsPvJpW5eASAI1tONehoUzFjPeTzKxO1N082fNPCYHluDKyWVMZHtfy-tsCYf6FddV3lqXOnkmYz0_lStx_RR3G0ittqmx4kdNqqR5c6qGl2GNecIPQRFSjeL-XSwFquekfRC-zignpzoIwTaqOSQvfv6zIuWpLiIRBpVmtrbqJMs51L8-TnRyTIzSGaWzjrlVJpEK07zytSeFAuVHvrZkpHT6L5TqhWK7sKQItNJM',
+  };
+
   return (
-    <div className="space-y-8">
-      {/* 헤더 */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-          <Link href="/dream" className="hover:text-foreground">꿈 사전</Link>
-          <span>/</span>
-          <span>{finalDream.name}</span>
-        </div>
+    <div className="relative flex min-h-screen w-full flex-col">
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-12">
+          {/* 메인 콘텐츠 - 8열 */}
+          <div className="lg:col-span-8">
+            <article>
+              {/* Breadcrumbs */}
+              <nav className="mb-6">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link href="/" className="text-sm text-slate-600 dark:text-slate-400 hover:text-primary">
+                    Home
+                  </Link>
+                  <span className="text-slate-600 dark:text-slate-400">/</span>
+                  <Link href="/dream" className="text-sm text-slate-600 dark:text-slate-400 hover:text-primary">
+                    Dream Dictionary
+                  </Link>
+                  <span className="text-slate-600 dark:text-slate-400">/</span>
+                  <span className="text-sm font-medium text-slate-900 dark:text-slate-50">
+                    {finalDream.name}
+                  </span>
+                </div>
+              </nav>
 
-        <div className="space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <h1 className="text-3xl md:text-4xl font-bold">{finalDream.name} 해몽</h1>
-              <p className="text-xl text-muted-foreground">{finalDream.summary}</p>
-            </div>
+              {/* 헤더 */}
+              <header className="mb-8">
+                <h1 className="text-4xl lg:text-5xl font-black leading-tight tracking-tighter text-slate-900 dark:text-slate-50 mb-4">
+                  {finalDream.name}
+                </h1>
+                <p className="text-lg text-slate-600 dark:text-slate-400">
+                  {finalDream.summary || 'A short, engaging paragraph summarizing the dream\'s meaning, exploring themes of freedom, control, and new perspectives on your life\'s challenges and opportunities.'}
+                </p>
+              </header>
 
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                <TrendingUp className="h-4 w-4" />
-                <span>{finalDream.popularity || 0}회 조회</span>
-              </div>
-              <Badge variant="secondary">{finalDream.category}</Badge>
-            </div>
-          </div>
-
-          {/* 빠른 답변 */}
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="pt-6">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-primary font-medium leading-relaxed">
+              {/* Direct Answer */}
+              <div className="mb-10 p-6 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+                <h2 className="text-lg font-bold leading-tight tracking-tighter mb-2 text-slate-900 dark:text-slate-50">
+                  Direct Answer
+                </h2>
+                <p className="text-base font-normal leading-normal text-slate-600 dark:text-slate-400">
                   {finalDream.quick_answer}
                 </p>
               </div>
-            </CardContent>
-          </Card>
 
-          <div className="flex flex-wrap gap-2">
-            {Array.isArray(finalDream.tags) && finalDream.tags.length > 0 && finalDream.tags.map((tag: string) => (
-              <Badge key={tag} variant="outline">
-                <Tag className="h-3 w-3 mr-1" />
-                {tag}
-              </Badge>
-            ))}
-          </div>
+              {/* Table of Contents */}
+              <details className="group mb-10 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden" open>
+                <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-slate-50">Table of Contents</h3>
+                  <span className="transition-transform group-open:rotate-180">
+                    <ChevronDown className="h-5 w-5" />
+                  </span>
+                </summary>
+                <div className="border-t border-slate-200 dark:border-slate-800 p-4">
+                  <nav>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                      {tocLinks.map((link) => (
+                        <li key={link.id}>
+                          <a
+                            href={`#${link.id}`}
+                            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary"
+                          >
+                            {link.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </div>
+              </details>
 
-          {/* 북마크 및 공유 버튼 */}
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              이 꿈 해석이 도움이 되셨나요?
-            </div>
-            <div className="flex items-center gap-3">
-              {/* SSR에서 브라우저 API 사용 컴포넌트 제외 */}
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <time dateTime={finalDream.last_updated || finalDream.created_at || new Date().toISOString()}>
-              마지막 업데이트: {new Date(finalDream.last_updated || finalDream.created_at || Date.now()).toLocaleDateString('ko-KR')}
-            </time>
-          </div>
-        </div>
-      </div>
-
-      {/* 메인 콘텐츠 */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* 목차 - 데스크톱 사이드바 */}
-        <div className="lg:col-span-1 order-2 lg:order-1">
-          <div className="sticky top-24 space-y-6">
-            <TableOfContents content={finalDream.body_mdx || ''} />
-          </div>
-        </div>
-
-        {/* 본문 */}
-        <div className="lg:col-span-2 order-1 lg:order-2">
-          <Card>
-            <CardContent className="p-6 md:p-8 lg:p-10">
-              <article className="max-w-none">
-                {/* 고도화된 MDX 렌더러 사용 */}
+              {/* 콘텐츠 */}
+              <div className="prose prose-lg max-w-none text-slate-900 dark:text-slate-50">
                 <MDXRenderer content={finalDream.body_mdx || ''} />
-              </article>
-            </CardContent>
-          </Card>
+              </div>
 
-          {/* 광고 슬롯 */}
-          <AdSlot slot="dream-content-middle" className="mt-8" />
+              {/* 광고 슬롯 */}
+              <div className="my-10 w-full min-h-[250px] bg-slate-50 dark:bg-slate-900 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-800">
+                <AdSlot slot="dream-content-middle" />
+              </div>
 
-          {/* FAQ 섹션 */}
-          <div className="mt-8">
-            <FAQAccordion faqs={faqs} />
-          </div>
-        </div>
-
-        {/* 사이드바 */}
-        <div className="lg:col-span-1 order-3">
-          <div className="sticky top-24 space-y-6">
-            {/* AI 해몽 CTA */}
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Brain className="h-5 w-5 text-primary" />
-                  <span>AI 해몽으로 더 자세히</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  심리학, 문화, 상징학 관점에서 개인 맞춤 분석을 받아보세요.
-                </p>
-                <Button asChild className="w-full">
+              {/* AI Interpretation 버튼 */}
+              <div className="my-12 py-8 border-t border-b border-slate-200 dark:border-slate-800">
+                <Button
+                  asChild
+                  className="w-full flex min-w-[84px] max-w-[480px] mx-auto h-12 px-6 bg-primary text-white text-base font-bold leading-normal"
+                >
                   <Link href={`/ai?dream=${finalDream.slug}`}>
-                    AI 해몽 시작하기
+                    Continue with AI Interpretation
                   </Link>
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* 관련 꿈 */}
-            {relatedDreams.length > 0 && (
-              <RelatedList items={relatedDreams} title="관련 꿈 해몽" />
-            )}
+              {/* FAQ */}
+              <section className="mb-12 scroll-mt-24" id="faq">
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-6">
+                  Frequently Asked Questions
+                </h2>
+                <div className="space-y-4">
+                  {faqs.map((faq, index) => (
+                    <details
+                      key={index}
+                      className="group p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800"
+                    >
+                      <summary className="flex justify-between items-center font-medium cursor-pointer list-none">
+                        <span className="text-slate-900 dark:text-slate-50">{faq.question}</span>
+                        <span className="transition-transform group-open:rotate-180">
+                          <ChevronDown className="h-5 w-5" />
+                        </span>
+                      </summary>
+                      <p className="text-slate-600 dark:text-slate-400 mt-3">
+                        {faq.answer}
+                      </p>
+                    </details>
+                  ))}
+                </div>
+              </section>
 
-            {/* 광고 슬롯 */}
-            <AdSlot slot="dream-sidebar" />
+              {/* Related Dreams */}
+              <section id="related-dreams">
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-6">
+                  Related Dreams
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {relatedDreams.slice(0, 3).map((related) => {
+                    const imageUrl = relatedDreamImages[related.slug] || relatedDreamImages['falling'];
+                    return (
+                      <Link
+                        key={related.slug}
+                        href={`/dream/${related.slug}`}
+                        className="group block bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden"
+                      >
+                        <div className="relative w-full aspect-video bg-center bg-no-repeat bg-cover">
+                          <Image
+                            src={imageUrl}
+                            alt={related.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <p className="text-base font-bold leading-tight group-hover:text-primary transition-colors text-slate-900 dark:text-slate-50">
+                            {related.title}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            </article>
           </div>
-        </div>
-      </div>
 
-      {/* 네비게이션 */}
-      <div className="flex justify-between items-center pt-8 border-t">
-        <Button variant="outline" asChild>
-          <Link href="/dream">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            꿈 사전으로 돌아가기
-          </Link>
-        </Button>
-
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
-            공유하기
-          </Button>
-          <Button variant="outline" size="sm">
-            북마크
-          </Button>
+          {/* 사이드바 - 4열 */}
+          <aside className="hidden lg:block lg:col-span-4">
+            <div className="sticky top-24">
+              <div className="w-full min-h-[600px] bg-slate-50 dark:bg-slate-900 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-800">
+                <AdSlot slot="dream-sidebar-vertical" />
+              </div>
+            </div>
+          </aside>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

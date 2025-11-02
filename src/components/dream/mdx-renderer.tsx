@@ -30,24 +30,47 @@ export default function MDXRenderer({ content, className = '' }: MDXRendererProp
 
     // 헤딩 변환 (H1은 페이지에 이미 있으므로 MDX에서는 H2부터 시작)
     // H2는 주요 섹션, H3는 하위 섹션
-    // 먼저 H2 변환
-    html = html.replace(/^## (.*$)/gim, (match, headingText) => {
-      const id = generateId(headingText);
-      return `<h2 class="text-2xl font-bold mt-10 mb-6 text-foreground border-b pb-2" id="${id}">${headingText}</h2>`;
-    });
-    // 그 다음 H3 변환
-    html = html.replace(/^### (.*$)/gim, (match, headingText) => {
-      const id = generateId(headingText);
-      return `<h3 class="text-xl font-semibold mt-8 mb-4 text-foreground" id="${id}">${headingText}</h3>`;
-    });
-    // MDX 내부의 H1은 H2로 변환 (페이지의 H1과 중복 방지)
-    html = html.replace(/^# (.*$)/gim, (match, headingText) => {
-      const id = generateId(headingText);
-      return `<h2 class="text-2xl font-bold mt-10 mb-6 text-foreground border-b pb-2" id="${id}">${headingText}</h2>`;
-    });
+    // 먼저 모든 헤딩을 찾아서 처리 (H1, H2, H3)
+    const lines = html.split('\n');
+    let processedLines: string[] = [];
+    let inSection = false;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const h1Match = line.match(/^# ([^#].*)$/);
+      const h2Match = line.match(/^## (.*)$/);
+      const h3Match = line.match(/^### (.*)$/);
+      
+      if (h1Match || h2Match) {
+        // 이전 섹션 닫기
+        if (inSection) {
+          processedLines.push('</section>');
+        }
+        // 새 섹션 시작
+        const headingText = h1Match ? h1Match[1] : h2Match![1];
+        const id = generateId(headingText);
+        processedLines.push(`<section class="mb-8 scroll-mt-24" id="${id}">`);
+        processedLines.push(`<h2 class="text-2xl font-bold text-slate-900 dark:text-slate-50">${headingText}</h2>`);
+        inSection = true;
+      } else if (h3Match) {
+        // H3는 섹션 내부에
+        const headingText = h3Match[1];
+        const id = generateId(headingText);
+        processedLines.push(`<h3 class="text-xl font-semibold mt-8 mb-4 text-slate-900 dark:text-slate-50" id="${id}">${headingText}</h3>`);
+      } else {
+        processedLines.push(line);
+      }
+    }
+    
+    // 마지막 섹션 닫기
+    if (inSection) {
+      processedLines.push('</section>');
+    }
+    
+    html = processedLines.join('\n');
 
     // 강조 및 기울임
-    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="font-semibold text-foreground">$1</strong>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="font-semibold text-slate-900 dark:text-slate-50">$1</strong>');
     html = html.replace(/\*(.*?)\*/gim, '<em class="italic">$1</em>');
 
     // 리스트 변환
@@ -89,7 +112,7 @@ export default function MDXRenderer({ content, className = '' }: MDXRendererProp
       return `<img src="${imageUrl}" alt="${alt}" class="rounded-lg my-4 max-w-full h-auto" loading="lazy" />`;
     });
 
-    // 단락 변환
+    // 단락 변환 (이미 헤딩은 변환됨)
     const lines = html.split('\n');
     let result: string[] = [];
     let currentParagraph: string[] = [];
@@ -97,10 +120,10 @@ export default function MDXRenderer({ content, className = '' }: MDXRendererProp
     lines.forEach((line) => {
       const trimmed = line.trim();
       
-      // 헤딩, 리스트, 표는 그대로 유지
-      if (trimmed.match(/^<h[1-6]|<ul|<li|<table|<tr|<\/ul|<\/table/)) {
+      // 섹션 시작/종료, HTML 태그는 그대로 유지
+      if (trimmed.match(/^<section|^<\/section|^<h[1-6]|<ul|<li|<table|<tr|<\/ul|<\/table|^<p|^<strong|^<em|^<a|^<img/)) {
         if (currentParagraph.length > 0) {
-          result.push(`<p class="mb-4 leading-relaxed text-foreground">${currentParagraph.join(' ')}</p>`);
+          result.push(`<p class="mb-4 leading-relaxed text-slate-900 dark:text-slate-50">${currentParagraph.join(' ')}</p>`);
           currentParagraph = [];
         }
         result.push(trimmed);
@@ -108,14 +131,14 @@ export default function MDXRenderer({ content, className = '' }: MDXRendererProp
         currentParagraph.push(trimmed);
       } else {
         if (currentParagraph.length > 0) {
-          result.push(`<p class="mb-4 leading-relaxed text-foreground">${currentParagraph.join(' ')}</p>`);
+          result.push(`<p class="mb-4 leading-relaxed text-slate-900 dark:text-slate-50">${currentParagraph.join(' ')}</p>`);
           currentParagraph = [];
         }
       }
     });
 
     if (currentParagraph.length > 0) {
-      result.push(`<p class="mb-4 leading-relaxed text-foreground">${currentParagraph.join(' ')}</p>`);
+      result.push(`<p class="mb-4 leading-relaxed text-slate-900 dark:text-slate-50">${currentParagraph.join(' ')}</p>`);
     }
 
     return result.join('\n');

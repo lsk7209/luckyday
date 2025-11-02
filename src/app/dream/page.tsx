@@ -1,136 +1,160 @@
 /**
- * 꿈 사전 페이지
- * @description 꿈 심볼 목록 및 검색 기능
+ * Dream Dictionary 페이지
+ * @description 꿈 심볼 목록 및 검색 기능 - HTML 디자인 반영
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Filter, Grid, List } from 'lucide-react';
+import Link from 'next/link';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Flight, 
+  Tooth, 
+  Droplets, 
+  Run, 
+  Web, 
+  Home, 
+  ArrowDown,
+  Plane,
+  Water,
+  Activity,
+  Spider,
+  Building
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import DreamCard from '@/components/dream/dream-card';
-import { AdvancedSearch } from '@/components/advanced-search';
+import AdSlot from '@/components/shared/ad-slot';
 import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol } from '@/types/dream';
 
+/**
+ * 꿈 이름에 따른 아이콘 매핑
+ */
+const getDreamIcon = (name: string, category: string) => {
+  const nameLower = name.toLowerCase();
+  
+  // 특정 꿈에 대한 아이콘 매핑
+  if (nameLower.includes('flying') || nameLower.includes('비행')) return Flight;
+  if (nameLower.includes('teeth') || nameLower.includes('이빨') || nameLower.includes('치아')) return Tooth;
+  if (nameLower.includes('water') || nameLower.includes('물')) return Droplets;
+  if (nameLower.includes('chase') || nameLower.includes('쫓김') || nameLower.includes('추격')) return Run;
+  if (nameLower.includes('spider') || nameLower.includes('거미')) return Web;
+  if (nameLower.includes('house') || nameLower.includes('집') || nameLower.includes('home')) return Home;
+  if (nameLower.includes('falling') || nameLower.includes('떨어짐') || nameLower.includes('낙하')) return ArrowDown;
+  
+  // 카테고리별 기본 아이콘
+  switch (category) {
+    case 'animal':
+      return Activity;
+    case 'place':
+      return Building;
+    case 'emotion':
+      return Activity;
+    default:
+      return Activity;
+  }
+};
+
 const CATEGORIES = [
-  { value: 'all', label: '전체' },
-  { value: 'animal', label: '동물' },
-  { value: 'emotion', label: '감정' },
-  { value: 'place', label: '장소' },
-  { value: 'object', label: '물건' },
-  { value: 'action', label: '행동' },
-  { value: 'color', label: '색상' },
-  { value: 'number', label: '숫자' },
+  { value: 'all', label: 'All Categories' },
+  { value: 'animal', label: 'Animals' },
+  { value: 'object', label: 'Objects' },
+  { value: 'emotion', label: 'Emotions' },
+  { value: 'place', label: 'Places' },
+  { value: 'action', label: 'Actions' },
+  { value: 'color', label: 'Colors' },
+  { value: 'number', label: 'Numbers' },
 ];
+
+const ALPHABET = ['All', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
 export default function DreamDictionary() {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedLetter, setSelectedLetter] = useState('All');
   const [sortBy, setSortBy] = useState<'popularity' | 'name'>('popularity');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [page, setPage] = useState(1);
-  const [searchResults, setSearchResults] = useState<DreamSymbol[]>([]);
-  const [isSearchMode, setIsSearchMode] = useState(false);
-  const pageSize = 20;
+  const pageSize = 12;
 
-  // 꿈 심볼 목록 조회
-  const { data: dreams, isLoading, error } = useQuery({
-    queryKey: ['dream-symbols', selectedCategory, sortBy, page],
-    queryFn: () => workersDreamDb.getDreamSymbols({
-      category: selectedCategory === 'all' ? undefined : selectedCategory,
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
-      orderBy: sortBy
-    }),
-    enabled: !isSearchMode,
+  // 전체 데이터와 페이지네이션된 데이터를 별도로 관리
+  const { data: allDreamsData, isLoading, error } = useQuery({
+    queryKey: ['dream-symbols-all', selectedCategory, selectedLetter, sortBy],
+    queryFn: async () => {
+      const allDreams = await workersDreamDb.getDreamSymbols({
+        category: selectedCategory === 'all' ? undefined : selectedCategory,
+        limit: 1000, // 알파벳 필터를 위해 충분한 데이터 가져오기
+        orderBy: sortBy
+      });
+      
+      // 알파벳 필터 적용
+      let filtered = allDreams;
+      if (selectedLetter !== 'All') {
+        filtered = allDreams.filter(dream => {
+          const firstLetter = dream.name.charAt(0).toUpperCase();
+          return firstLetter === selectedLetter;
+        });
+      }
+      
+      return filtered;
+    },
   });
 
-  // AdvancedSearch에서 받은 SearchResult[]를 DreamSymbol[]로 변환
-  const handleAdvancedSearch = (query: string, results: Array<{
-    id: string;
-    slug: string;
-    name: string;
-    summary: string;
-    category: string;
-    popularity: number;
-    tags: string[];
-    searchScore?: number;
-  }>) => {
-    // SearchResult를 DreamSymbol로 변환 (필요한 필드만 포함)
-    const dreamSymbols: DreamSymbol[] = results.map(result => ({
-      id: result.id,
-      slug: result.slug,
-      name: result.name,
-      category: result.category,
-      summary: result.summary,
-      quick_answer: result.summary, // summary를 quick_answer로 사용
-      body_mdx: '', // 검색 결과에는 MDX가 없을 수 있음
-      tags: result.tags,
-      popularity: result.popularity,
-      polarities: {}, // 기본값
-      modifiers: {}, // 기본값
-      last_updated: new Date().toISOString(), // 기본값
-    }));
-    setSearchResults(dreamSymbols);
-    setIsSearchMode(dreamSymbols.length > 0);
-    setPage(1);
-  };
+  // 페이지네이션 적용
+  const dreams = useMemo(() => {
+    if (!allDreamsData) return [];
+    const startIndex = (page - 1) * pageSize;
+    return allDreamsData.slice(startIndex, startIndex + pageSize);
+  }, [allDreamsData, page]);
 
-  const clearSearch = () => {
-    setSearchResults([]);
-    setIsSearchMode(false);
-    setPage(1);
-  };
+  // 총 페이지 수 계산
+  const totalPages = useMemo(() => {
+    if (!allDreamsData || allDreamsData.length === 0) return 1;
+    return Math.ceil(allDreamsData.length / pageSize);
+  }, [allDreamsData]);
 
-  const displayDreams = isSearchMode ? searchResults : dreams;
+  // 페이지네이션 계산
+  const maxPages = 10; // HTML에서 보이는 최대 페이지 수
+  const paginationPages = useMemo(() => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= maxPages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1, 2, 3, '...', totalPages);
+    }
+    return pages;
+  }, [totalPages]);
 
-  // 로딩 상태 컴포넌트
+  // 로딩 상태
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold">꿈 사전</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            꿈 심볼을 검색하고 의미를 알아보세요
-          </p>
+      <div className="flex flex-col gap-8 py-8 md:py-12 px-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter">
+              Dream Dictionary
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal max-w-xl">
+              Search our comprehensive dictionary to uncover the psychological and symbolic meanings behind your dreams.
+            </p>
+          </div>
         </div>
-        <div className="max-w-4xl mx-auto">
-          <AdvancedSearch
-            onSearch={handleAdvancedSearch}
-            placeholder="꿈에 대해 자연어로 물어보세요"
-            showRecommendations={true}
-          />
-        </div>
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-                <div className="h-3 bg-muted rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-3 bg-muted rounded mb-2"></div>
-                <div className="h-3 bg-muted rounded w-2/3"></div>
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Card key={i} className="animate-pulse h-[250px]"></Card>
           ))}
         </div>
       </div>
     );
   }
 
-  // 에러 상태 컴포넌트
+  // 에러 상태
   if (error) {
     return (
-      <div className="space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold">꿈 사전</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            꿈 심볼을 검색하고 의미를 알아보세요
-          </p>
-        </div>
+      <div className="flex flex-col gap-8 py-8 md:py-12 px-4 sm:px-6">
         <div className="text-center py-12">
           <p className="text-red-500">데이터를 불러오는 중 오류가 발생했습니다.</p>
         </div>
@@ -140,123 +164,191 @@ export default function DreamDictionary() {
 
   // 기본 렌더링
   return (
-    <div className="space-y-8">
-      {/* 헤더 */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl md:text-4xl font-bold">꿈 사전</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          꿈 심볼을 검색하고 의미를 알아보세요
-        </p>
-      </div>
-
-      {/* 고급 검색 */}
-      <div className="max-w-4xl mx-auto">
-        <AdvancedSearch
-          onSearch={handleAdvancedSearch}
-          placeholder="꿈에 대해 자연어로 물어보세요"
-          showRecommendations={true}
-        />
-      </div>
-
-      {/* 카테고리 필터 */}
-      {!isSearchMode && (
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-          <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4" />
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((category) => (
-                  <SelectItem key={category.value} value={category.value}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground">정렬:</span>
-            <Select value={sortBy} onValueChange={(value: 'popularity' | 'name') => setSortBy(value)}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="popularity">인기순</SelectItem>
-                <SelectItem value="name">가나다순</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-            >
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* 검색 결과 헤더 */}
-      {isSearchMode && (
-        <div className="text-center">
-          <p className="text-muted-foreground">
-            검색 결과: {displayDreams?.length || 0}개
+    <div className="flex flex-col gap-8 py-8 md:py-12">
+      {/* 제목 섹션 */}
+      <div className="flex flex-wrap items-center justify-between gap-6 px-4 sm:px-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter text-slate-900 dark:text-slate-50">
+            Dream Dictionary
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal max-w-xl">
+            Search our comprehensive dictionary to uncover the psychological and symbolic meanings behind your dreams.
           </p>
-          <Button variant="ghost" size="sm" onClick={clearSearch} className="mt-2">
-            검색 초기화
-          </Button>
         </div>
-      )}
+      </div>
 
-      {/* 콘텐츠 */}
-      {!displayDreams || displayDreams.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-muted-foreground mb-4">
-            등록된 꿈 심볼이 없습니다.
+      {/* 필터 섹션 */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-y border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-4">
+        {/* 알파벳 필터 */}
+        <div className="flex items-center gap-4 flex-wrap">
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Filter by Letter:</p>
+          <div className="flex gap-1.5 flex-wrap">
+            {ALPHABET.slice(0, 4).map((letter) => (
+              <Button
+                key={letter}
+                variant={selectedLetter === letter ? 'default' : 'ghost'}
+                size="sm"
+                className={`h-8 w-8 shrink-0 ${
+                  selectedLetter === letter 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+                }`}
+                onClick={() => {
+                  setSelectedLetter(letter);
+                  setPage(1);
+                }}
+              >
+                {letter === 'All' ? 'All' : letter === '...' ? '...' : letter}
+              </Button>
+            ))}
+            <span className="text-slate-400 dark:text-slate-500 py-2">...</span>
+            {ALPHABET.slice(-1).map((letter) => (
+              <Button
+                key={letter}
+                variant={selectedLetter === letter ? 'default' : 'ghost'}
+                size="sm"
+                className={`h-8 w-8 shrink-0 ${
+                  selectedLetter === letter 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+                }`}
+                onClick={() => {
+                  setSelectedLetter(letter);
+                  setPage(1);
+                }}
+              >
+                {letter}
+              </Button>
+            ))}
           </div>
         </div>
-      ) : (
-        <div className={`grid gap-4 md:gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-          {displayDreams.map((dream: DreamSymbol) => (
-            <DreamCard key={dream.slug} dream={dream} />
-          ))}
+
+        {/* 정렬 및 카테고리 */}
+        <div className="flex items-center gap-4 flex-wrap">
+          <Select value={sortBy} onValueChange={(value: 'popularity' | 'name') => setSortBy(value)}>
+            <SelectTrigger className="w-40 bg-card border border-slate-200 dark:border-slate-800 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              <SelectValue>
+                {sortBy === 'popularity' ? 'Sort by Popularity' : 'Sort by Alphabetical'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="popularity">Sort by Popularity</SelectItem>
+              <SelectItem value="name">Sort by Alphabetical</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedCategory} onValueChange={(value) => {
+            setSelectedCategory(value);
+            setPage(1);
+          }}>
+            <SelectTrigger className="w-40 bg-card border border-slate-200 dark:border-slate-800 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((category) => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )}
+      </div>
+
+      {/* 카드 그리드 */}
+      <div className="px-4 sm:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {dreams && dreams.length > 0 ? (
+            <>
+              {dreams.map((dream: DreamSymbol, index: number) => {
+                const IconComponent = getDreamIcon(dream.name, dream.category);
+                
+                // 4번째 카드 위치에 광고 삽입
+                if (index === 4) {
+                  return (
+                    <div key={`ad-${index}`}>
+                      <div className="flex min-h-[250px] items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-slate-500 dark:text-slate-400">
+                        <AdSlot slot="dream-dictionary-ad" />
+                      </div>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <Link key={dream.slug} href={`/dream/${dream.slug}`}>
+                    <Card className="group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full">
+                      <IconComponent className="h-12 w-12 text-primary" />
+                      <div className="flex flex-col gap-1">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+                          {dream.name}
+                        </h2>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                          {dream.summary || dream.quick_answer}
+                        </p>
+                      </div>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </>
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-slate-500 dark:text-slate-400">
+                No dream symbols found.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* 페이지네이션 */}
-      {!isSearchMode && dreams && dreams.length >= pageSize && (
-        <div className="flex justify-center space-x-2">
+      <div className="flex items-center justify-center pt-8 px-4 sm:px-6">
+        <nav aria-label="Pagination" className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-md text-slate-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-gray-800"
             disabled={page === 1}
             onClick={() => setPage(page - 1)}
+            aria-label="Previous page"
           >
-            이전
+            <ChevronLeft className="h-5 w-5" />
           </Button>
-          <span className="px-4 py-2 text-muted-foreground">
-            {page} 페이지
-          </span>
+          
+          {paginationPages.map((pageNum, idx) => (
+            pageNum === '...' ? (
+              <span key={`ellipsis-${idx}`} className="text-slate-500 dark:text-slate-400 px-2">
+                ...
+              </span>
+            ) : (
+              <Button
+                key={pageNum}
+                variant={page === pageNum ? 'default' : 'ghost'}
+                size="icon"
+                className={`h-10 w-10 rounded-md font-medium text-sm ${
+                  page === pageNum
+                    ? 'bg-primary/20 text-primary'
+                    : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+                }`}
+                onClick={() => setPage(pageNum as number)}
+              >
+                {pageNum}
+              </Button>
+            )
+          ))}
+          
           <Button
-            variant="outline"
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-md text-slate-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-gray-800"
+            disabled={page >= totalPages}
             onClick={() => setPage(page + 1)}
+            aria-label="Next page"
           >
-            다음
+            <ChevronRight className="h-5 w-5" />
           </Button>
-        </div>
-      )}
+        </nav>
+      </div>
     </div>
   );
 }
