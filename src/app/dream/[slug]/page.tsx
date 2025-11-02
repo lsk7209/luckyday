@@ -17,8 +17,110 @@ import AdSlot from '@/components/shared/ad-slot';
 import MDXRenderer from '@/components/dream/mdx-renderer';
 import { workersDreamDb } from '@/lib/api-client-dream';
 import { DreamSymbol, DreamPageProps } from '@/types/dream';
+import { getWorkersApiUrl } from '@/lib/workers-api-url';
 
-// 임시 데이터 - 실제로는 API에서 가져올 예정
+// 서버 컴포넌트에서 직접 API 호출하는 헬퍼 함수
+async function fetchDreamFromApi(slug: string): Promise<DreamSymbol | null> {
+  try {
+    const apiUrl = getWorkersApiUrl();
+    const response = await fetch(`${apiUrl}/api/dream/${slug}`, {
+      next: { revalidate: 3600 }, // 1시간마다 재검증 (ISR)
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      console.error(`Failed to fetch dream: ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.success || !data.dream) {
+      return null;
+    }
+
+    // JSON 문자열을 객체로 파싱
+    const dream = data.dream;
+    return {
+      ...dream,
+      id: String(dream.id || dream.slug),
+      tags: Array.isArray(dream.tags) ? dream.tags : (typeof dream.tags === 'string' ? JSON.parse(dream.tags || '[]') : []),
+      polarities: typeof dream.polarities === 'string' ? JSON.parse(dream.polarities || '{}') : (dream.polarities || {}),
+      modifiers: typeof dream.modifiers === 'string' ? JSON.parse(dream.modifiers || '{}') : (dream.modifiers || {}),
+    };
+  } catch (error) {
+    console.error('[Server] 꿈 데이터 조회 실패:', error);
+    return null;
+  }
+}
+
+// 관련 꿈 조회 헬퍼 함수
+async function fetchRelatedDreams(slug: string): Promise<Array<{
+  slug: string;
+  title: string;
+  type: 'dream';
+  similarity: number;
+}>> {
+  try {
+    const apiUrl = getWorkersApiUrl();
+    const response = await fetch(`${apiUrl}/api/dream/related?slug=${encodeURIComponent(slug)}&limit=5`, {
+      next: { revalidate: 3600 },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    if (!data.success || !Array.isArray(data.related)) {
+      return [];
+    }
+
+    return data.related.map((item: any) => ({
+      slug: item.slug,
+      title: item.title || item.name || item.slug,
+      type: 'dream' as const,
+      similarity: item.similarity || item.weight || 0.5,
+    }));
+  } catch (error) {
+    console.error('[Server] 관련 꿈 조회 실패:', error);
+    return [];
+  }
+}
+
+// 모든 꿈 slug 목록 조회 (정적 생성용)
+async function getAllDreamSlugs(): Promise<string[]> {
+  try {
+    const apiUrl = getWorkersApiUrl();
+    const response = await fetch(`${apiUrl}/api/dream?limit=1000&orderBy=popularity`, {
+      next: { revalidate: 86400 }, // 24시간마다 재검증
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    if (!data.success || !Array.isArray(data.dreams)) {
+      return [];
+    }
+
+    return data.dreams.map((dream: any) => dream.slug).filter(Boolean);
+  } catch (error) {
+    console.error('[Server] 꿈 목록 조회 실패:', error);
+    return [];
+  }
+}
+
+// 임시 폴백 데이터 (API 실패 시 사용)
 const mockDreamData: Record<string, DreamSymbol> = {
   'baem-snake-dream': {
     id: '1',
@@ -204,46 +306,97 @@ function generateDreamFAQs(dream: DreamSymbol): Array<{ question: string; answer
   return baseFAQs;
 }
 
-// output: 'export' 모드에서 필수: 정적 생성할 slug 목록
+// 동적 정적 생성: 데이터베이스에서 모든 꿈 slug를 가져와 정적 페이지 생성
 export async function generateStaticParams() {
-  return Object.keys(mockDreamData).map((slug) => ({
-    slug,
-  }));
+  try {
+    const slugs = await getAllDreamSlugs();
+    
+    // API에서 데이터를 가져오지 못한 경우 기본 slug만 반환
+    if (slugs.length === 0) {
+      console.warn('[generateStaticParams] API에서 slug를 가져오지 못했습니다. 기본 slug를 사용합니다.');
+      return Object.keys(mockDreamData).map((slug) => ({ slug }));
+    }
+    
+    return slugs.map((slug) => ({ slug }));
+  } catch (error) {
+    console.error('[generateStaticParams] 오류:', error);
+    // 오류 발생 시 기본 slug 반환
+    return Object.keys(mockDreamData).map((slug) => ({ slug }));
+  }
 }
 
 // SEO 메타데이터 생성
 export async function generateMetadata({ params }: DreamPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const dream = mockDreamData[slug];
+  
+  // API에서 데이터 가져오기 시도
+  const dream = await fetchDreamFromApi(slug) || mockDreamData[slug];
 
   if (!dream) {
     return {
       title: '꿈을 찾을 수 없습니다',
+      description: '요청하신 꿈 정보가 존재하지 않거나 삭제되었을 수 있습니다.',
     };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://luckyday.app';
+  const canonicalUrl = `${baseUrl}/dream/${slug}`;
+  
+  // 핵심 키워드를 앞쪽에 배치: "꿈해몽 [꿈이름]"
+  const seoTitle = `꿈해몽 ${dream.name} | ${dream.name} 꿈 의미 해석`;
+  const seoDescription = `${dream.name} 꿈해몽은 ${dream.summary} ${dream.quick_answer?.substring(0, 60) || ''}...`;
+  
   return {
-    title: `${dream.name} 해몽 | 의미·상황별 해석`,
-    description: dream.summary,
-    keywords: dream.tags.join(', '),
+    title: seoTitle,
+    description: seoDescription,
+    keywords: Array.isArray(dream.tags) ? dream.tags.join(', ') : '',
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: `${dream.name} 꿈 해몽 - 심리학적 분석`,
-      description: dream.summary,
+      title: seoTitle,
+      description: seoDescription,
       type: 'article',
+      url: canonicalUrl,
+      images: [
+        {
+          url: `${baseUrl}/og-dream-${slug}.png`,
+          width: 1200,
+          height: 630,
+          alt: `${dream.name} 꿈해몽`,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${dream.name} 꿈 해몽`,
-      description: dream.summary,
+      title: seoTitle,
+      description: seoDescription,
+      images: [`${baseUrl}/og-dream-${slug}.png`],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }
 
 export default async function DreamPage({ params }: DreamPageProps) {
   const { slug } = await params;
-  const dream = mockDreamData[slug];
+  
+  // 데이터베이스에서 꿈 데이터 가져오기
+  const dream = await fetchDreamFromApi(slug);
 
-  if (!dream) {
+  // API에서 가져오지 못한 경우 폴백 데이터 사용
+  const finalDream = dream || mockDreamData[slug];
+
+  if (!finalDream) {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold mb-4">꿈을 찾을 수 없습니다</h1>
@@ -261,23 +414,10 @@ export default async function DreamPage({ params }: DreamPageProps) {
   }
 
   // 상세 FAQ 데이터 (꿈별 맞춤)
-  const faqs = generateDreamFAQs(dream);
+  const faqs = generateDreamFAQs(finalDream);
 
-  // 임시 관련 꿈 데이터
-  const relatedDreams = [
-    {
-      slug: 'baem-snake-dream',
-      title: '뱀 꿈 해몽',
-      type: 'dream' as const,
-      similarity: 0.8
-    },
-    {
-      slug: 'tooth-loss-dream',
-      title: '이빨 꿈 해몽',
-      type: 'dream' as const,
-      similarity: 0.7
-    }
-  ];
+  // 관련 꿈 데이터 가져오기
+  const relatedDreams = await fetchRelatedDreams(slug);
 
   return (
     <div className="space-y-8">
@@ -286,22 +426,22 @@ export default async function DreamPage({ params }: DreamPageProps) {
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <Link href="/dream" className="hover:text-foreground">꿈 사전</Link>
           <span>/</span>
-          <span>{dream.name}</span>
+          <span>{finalDream.name}</span>
         </div>
 
         <div className="space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <h1 className="text-3xl md:text-4xl font-bold">{dream.name} 해몽</h1>
-              <p className="text-xl text-muted-foreground">{dream.summary}</p>
+              <h1 className="text-3xl md:text-4xl font-bold">{finalDream.name} 해몽</h1>
+              <p className="text-xl text-muted-foreground">{finalDream.summary}</p>
             </div>
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                 <TrendingUp className="h-4 w-4" />
-                <span>{dream.popularity}회 조회</span>
+                <span>{finalDream.popularity || 0}회 조회</span>
               </div>
-              <Badge variant="secondary">{dream.category}</Badge>
+              <Badge variant="secondary">{finalDream.category}</Badge>
             </div>
           </div>
 
@@ -311,14 +451,14 @@ export default async function DreamPage({ params }: DreamPageProps) {
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                 <p className="text-primary font-medium leading-relaxed">
-                  {dream.quick_answer}
+                  {finalDream.quick_answer}
                 </p>
               </div>
             </CardContent>
           </Card>
 
           <div className="flex flex-wrap gap-2">
-            {dream.tags.map((tag) => (
+            {Array.isArray(finalDream.tags) && finalDream.tags.length > 0 && finalDream.tags.map((tag: string) => (
               <Badge key={tag} variant="outline">
                 <Tag className="h-3 w-3 mr-1" />
                 {tag}
@@ -338,8 +478,8 @@ export default async function DreamPage({ params }: DreamPageProps) {
 
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
-            <time dateTime={dream.last_updated}>
-              마지막 업데이트: {new Date(dream.last_updated).toLocaleDateString('ko-KR')}
+            <time dateTime={finalDream.last_updated || finalDream.created_at}>
+              마지막 업데이트: {new Date(finalDream.last_updated || finalDream.created_at || Date.now()).toLocaleDateString('ko-KR')}
             </time>
           </div>
         </div>
@@ -350,7 +490,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
         {/* 목차 - 데스크톱 사이드바 */}
         <div className="lg:col-span-1 order-2 lg:order-1">
           <div className="sticky top-24 space-y-6">
-            <TableOfContents content={dream.body_mdx} />
+            <TableOfContents content={finalDream.body_mdx || ''} />
           </div>
         </div>
 
@@ -360,7 +500,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
             <CardContent className="p-6 md:p-8 lg:p-10">
               <article className="max-w-none">
                 {/* 고도화된 MDX 렌더러 사용 */}
-                <MDXRenderer content={dream.body_mdx} />
+                <MDXRenderer content={finalDream.body_mdx || ''} />
               </article>
             </CardContent>
           </Card>
@@ -390,7 +530,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
                   심리학, 문화, 상징학 관점에서 개인 맞춤 분석을 받아보세요.
                 </p>
                 <Button asChild className="w-full">
-                  <Link href={`/ai?dream=${dream.slug}`}>
+                  <Link href={`/ai?dream=${finalDream.slug}`}>
                     AI 해몽 시작하기
                   </Link>
                 </Button>
@@ -398,7 +538,9 @@ export default async function DreamPage({ params }: DreamPageProps) {
             </Card>
 
             {/* 관련 꿈 */}
-            <RelatedList items={relatedDreams} title="관련 꿈 해몽" />
+            {relatedDreams.length > 0 && (
+              <RelatedList items={relatedDreams} title="관련 꿈 해몽" />
+            )}
 
             {/* 광고 슬롯 */}
             <AdSlot slot="dream-sidebar" />

@@ -15,14 +15,36 @@ interface MDXRendererProps {
  * @param className - 추가 CSS 클래스
  */
 export default function MDXRenderer({ content, className = '' }: MDXRendererProps) {
+  // ID 생성 함수 (헤딩용)
+  const generateId = (text: string): string => {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 50);
+  };
+
   // MDX를 HTML로 변환하는 함수
   const parseMDX = (mdx: string): string => {
     let html = mdx;
 
-    // 헤딩 변환
-    html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold mt-8 mb-4 text-foreground">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-10 mb-6 text-foreground border-b pb-2">$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-12 mb-8 text-foreground">$1</h1>');
+    // 헤딩 변환 (H1은 페이지에 이미 있으므로 MDX에서는 H2부터 시작)
+    // H2는 주요 섹션, H3는 하위 섹션
+    // 먼저 H2 변환
+    html = html.replace(/^## (.*$)/gim, (match, headingText) => {
+      const id = generateId(headingText);
+      return `<h2 class="text-2xl font-bold mt-10 mb-6 text-foreground border-b pb-2" id="${id}">${headingText}</h2>`;
+    });
+    // 그 다음 H3 변환
+    html = html.replace(/^### (.*$)/gim, (match, headingText) => {
+      const id = generateId(headingText);
+      return `<h3 class="text-xl font-semibold mt-8 mb-4 text-foreground" id="${id}">${headingText}</h3>`;
+    });
+    // MDX 내부의 H1은 H2로 변환 (페이지의 H1과 중복 방지)
+    html = html.replace(/^# (.*$)/gim, (match, headingText) => {
+      const id = generateId(headingText);
+      return `<h2 class="text-2xl font-bold mt-10 mb-6 text-foreground border-b pb-2" id="${id}">${headingText}</h2>`;
+    });
 
     // 강조 및 기울임
     html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="font-semibold text-foreground">$1</strong>');
@@ -43,8 +65,29 @@ export default function MDXRenderer({ content, className = '' }: MDXRendererProp
       return `<table class="w-full border-collapse border my-4">${match}</table>`;
     });
 
-    // 링크 변환
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" class="text-primary hover:underline">$1</a>');
+    // 링크 변환 (내부/외부 링크 구분)
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, (match, linkText, url) => {
+      const isExternal = url.startsWith('http') && !url.includes('luckyday.app');
+      const isInternalDream = url.startsWith('dream:');
+      
+      if (isInternalDream) {
+        // 내부 꿈 링크: dream:slug 형식을 /dream/slug로 변환
+        const slug = url.replace('dream:', '');
+        return `<a href="/dream/${slug}" class="text-primary hover:underline font-medium" title="${linkText} 꿈해몽 보기">${linkText}</a>`;
+      } else if (isExternal) {
+        // 외부 링크: rel="nofollow noopener" 추가 (SEO: 전문성 부여)
+        return `<a href="${url}" class="text-primary hover:underline" target="_blank" rel="nofollow noopener noreferrer" title="${linkText} (외부 링크)">${linkText} <span class="text-xs">↗</span></a>`;
+      } else {
+        // 내부 링크
+        return `<a href="${url}" class="text-primary hover:underline">${linkText}</a>`;
+      }
+    });
+    
+    // 이미지 링크 변환 (Alt 텍스트 추가)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, (match, altText, imageUrl) => {
+      const alt = altText || '꿈해몽 관련 이미지';
+      return `<img src="${imageUrl}" alt="${alt}" class="rounded-lg my-4 max-w-full h-auto" loading="lazy" />`;
+    });
 
     // 단락 변환
     const lines = html.split('\n');

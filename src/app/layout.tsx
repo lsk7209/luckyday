@@ -14,11 +14,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "럭키데이 - AI 꿈 해몽",
-    template: "%s | 럭키데이"
+    default: "꿈해몽 AI | 꿈 해석 의미 찾기",
+    template: "%s | 꿈해몽 AI"
   },
-  description: "AI 기반 꿈 해몽 서비스 - 심리학·문화·상징학으로 꿈을解读. 5,000개 이상의 꿈 사전과 개인 맞춤 AI 분석으로 당신의 꿈을 정확하게 해석합니다.",
-  keywords: ["꿈해몽", "꿈풀이", "AI해몽", "심리학", "상징학", "꿈사전", "꿈해석", "꿈분석"],
+  description: "꿈해몽 AI로 꿈의 의미를 정확하게 해석하세요. 200개 이상의 꿈 사전과 AI 분석으로 뱀 꿈, 이빨 꿈 등 다양한 꿈 해몽을 제공합니다.",
+  keywords: ["꿈해몽", "꿈해석", "꿈의의미", "꿈풀이", "AI꿈해몽", "꿈사전", "뱀꿈", "이빨꿈", "꿈분석"],
   authors: [{ name: "럭키데이" }],
   creator: "럭키데이",
   publisher: "럭키데이",
@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://luckyday.app'),
   alternates: {
     canonical: '/',
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
   },
   openGraph: {
     type: 'website',
@@ -111,7 +114,14 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3050601904412736"
+          crossOrigin="anonymous"
+        />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css"
