@@ -441,32 +441,26 @@ INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight, created_at) V
 ('pregnancy-dream', 'baby-dream', 0.8, datetime('now')),
 ('pregnancy-dream', 'house-dream', 0.5, datetime('now'));
 
--- 쫓기는 꿈 관련
 INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight, created_at) VALUES
 ('chase-dream', 'fall-dream', 0.7, datetime('now')),
 ('chase-dream', 'driving-dream', 0.6, datetime('now'));
 
--- 불 꿈 관련
 INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight, created_at) VALUES
 ('fire-dream', 'water-dream', 0.8, datetime('now')),
 ('fire-dream', 'money-dream', 0.5, datetime('now'));
 
--- 물 꿈 관련
 INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight, created_at) VALUES
 ('water-dream', 'fire-dream', 0.8, datetime('now')),
 ('water-dream', 'baby-dream', 0.6, datetime('now'));
 
--- 돈 꿈 관련
 INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight, created_at) VALUES
 ('money-dream', 'house-dream', 0.7, datetime('now')),
 ('money-dream', 'work-dream', 0.6, datetime('now'));
 
--- 아기 꿈 관련
 INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight, created_at) VALUES
 ('baby-dream', 'pregnancy-dream', 0.8, datetime('now')),
 ('baby-dream', 'water-dream', 0.6, datetime('now'));
 
--- 죽음 꿈 관련
 INSERT OR REPLACE INTO dream_relation (from_slug, to_slug, weight, created_at) VALUES
 ('death-dream', 'tooth-loss-dream', 0.7, datetime('now')),
 ('death-dream', 'water-dream', 0.5, datetime('now'));

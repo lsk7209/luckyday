@@ -15,7 +15,7 @@ import AdSlot from '@/components/shared/ad-slot';
 /**
  * 블로그 카테고리
  */
-const CATEGORIES = ['All Posts', 'Psychology', 'Symbolism', 'Culture', 'Sleep Science'];
+const CATEGORIES = ['전체', '심리학', '상징', '문화', '수면과학'];
 
 /**
  * 블로그 포스트 데이터 (임시 - 실제로는 API에서 가져올 예정)
@@ -88,16 +88,26 @@ const BLOG_POSTS = [
 ];
 
 export default function BlogPage() {
-  const [selectedCategory, setSelectedCategory] = useState('All Posts');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
   const [page, setPage] = useState(1);
   const pageSize = 9; // 3x3 그리드
 
+  // 카테고리 매핑 (한글 -> 영어)
+  const categoryMap: Record<string, string> = {
+    '전체': 'All Posts',
+    '심리학': 'Psychology',
+    '상징': 'Symbolism',
+    '문화': 'Culture',
+    '수면과학': 'Sleep Science'
+  };
+
   // 카테고리 필터 적용
   const filteredPosts = useMemo(() => {
-    if (selectedCategory === 'All Posts') {
+    if (selectedCategory === '전체') {
       return BLOG_POSTS;
     }
-    return BLOG_POSTS.filter(post => post.category === selectedCategory);
+    const englishCategory = categoryMap[selectedCategory] || selectedCategory;
+    return BLOG_POSTS.filter(post => post.category === englishCategory);
   }, [selectedCategory]);
 
   // 페이지네이션 적용
@@ -132,10 +142,10 @@ export default function BlogPage() {
             {/* Hero Section */}
             <div className="mb-10 text-center">
               <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl">
-                The DreamScope Blog
+                DreamScope 블로그
               </h1>
               <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-                Exploring the Psychology and Symbolism of Our Inner Worlds
+                우리 내면 세계의 심리학과 상징 탐구
               </p>
             </div>
 

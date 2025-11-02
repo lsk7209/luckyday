@@ -439,11 +439,11 @@ export default async function DreamPage({ params }: DreamPageProps) {
               <nav className="mb-6">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link href="/" className="text-sm text-slate-600 dark:text-slate-400 hover:text-primary">
-                    Home
+                    홈
                   </Link>
                   <span className="text-slate-600 dark:text-slate-400">/</span>
                   <Link href="/dream" className="text-sm text-slate-600 dark:text-slate-400 hover:text-primary">
-                    Dream Dictionary
+                    꿈 사전
                   </Link>
                   <span className="text-slate-600 dark:text-slate-400">/</span>
                   <span className="text-sm font-medium text-slate-900 dark:text-slate-50">
@@ -465,7 +465,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
               {/* Direct Answer */}
               <div className="mb-10 p-6 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
                 <h2 className="text-lg font-bold leading-tight tracking-tighter mb-2 text-slate-900 dark:text-slate-50">
-                  Direct Answer
+                  빠른 해답
                 </h2>
                 <p className="text-base font-normal leading-normal text-slate-600 dark:text-slate-400">
                   {finalDream.quick_answer}
@@ -475,7 +475,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
               {/* Table of Contents */}
               <details className="group mb-10 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden" open>
                 <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
-                  <h3 className="font-bold text-lg text-slate-900 dark:text-slate-50">Table of Contents</h3>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-slate-50">목차</h3>
                   <span className="transition-transform group-open:rotate-180">
                     <ChevronDown className="h-5 w-5" />
                   </span>
@@ -515,7 +515,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
                   className="w-full flex min-w-[84px] max-w-[480px] mx-auto h-12 px-6 bg-primary text-white text-base font-bold leading-normal"
                 >
                   <Link href={`/ai?dream=${finalDream.slug}`}>
-                    Continue with AI Interpretation
+                    AI 해몽 받기
                   </Link>
                 </Button>
               </div>
@@ -548,7 +548,7 @@ export default async function DreamPage({ params }: DreamPageProps) {
               {/* Related Dreams */}
               <section id="related-dreams">
                 <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-6">
-                  Related Dreams
+                  관련 꿈
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {relatedDreams.slice(0, 3).map((related) => {

@@ -56,41 +56,58 @@ const getDreamIcon = (name: string, category: string) => {
 };
 
 const CATEGORIES = [
-  { value: 'all', label: 'All Categories' },
-  { value: 'animal', label: 'Animals' },
-  { value: 'object', label: 'Objects' },
-  { value: 'emotion', label: 'Emotions' },
-  { value: 'place', label: 'Places' },
-  { value: 'action', label: 'Actions' },
-  { value: 'color', label: 'Colors' },
-  { value: 'number', label: 'Numbers' },
+  { value: 'all', label: '전체' },
+  { value: 'animal', label: '동물' },
+  { value: 'object', label: '물건' },
+  { value: 'emotion', label: '감정' },
+  { value: 'place', label: '장소' },
+  { value: 'action', label: '행동' },
+  { value: 'color', label: '색상' },
+  { value: 'number', label: '숫자' },
+  { value: 'scenario', label: '상황' },
+  { value: 'body', label: '신체' },
+  { value: 'element', label: '원소' },
 ];
 
-const ALPHABET = ['All', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+// 한글 초성 필터
+const KOREAN_INITIALS = ['전체', 'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
 
 export default function DreamDictionary() {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedLetter, setSelectedLetter] = useState('All');
+  const [selectedInitial, setSelectedInitial] = useState('전체');
   const [sortBy, setSortBy] = useState<'popularity' | 'name'>('popularity');
   const [page, setPage] = useState(1);
   const pageSize = 12;
 
+  // 한글 초성 추출 함수
+  const getKoreanInitial = (text: string): string => {
+    const firstChar = text.charAt(0);
+    // 한글 유니코드 범위: AC00 (가) ~ D7A3 (힣)
+    const code = firstChar.charCodeAt(0);
+    if (code >= 0xAC00 && code <= 0xD7A3) {
+      const initialCode = Math.floor((code - 0xAC00) / 0x24C);
+      const initials = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+      return initials[initialCode];
+    }
+    return '';
+  };
+
   // 전체 데이터와 페이지네이션된 데이터를 별도로 관리
   const { data: allDreamsData, isLoading, error } = useQuery({
-    queryKey: ['dream-symbols-all', selectedCategory, selectedLetter, sortBy],
+    queryKey: ['dream-symbols-all', selectedCategory, selectedInitial, sortBy],
     queryFn: async () => {
       const allDreams = await workersDreamDb.getDreamSymbols({
         category: selectedCategory === 'all' ? undefined : selectedCategory,
-        limit: 1000, // 알파벳 필터를 위해 충분한 데이터 가져오기
+        limit: 1000, // 초성 필터를 위해 충분한 데이터 가져오기
         orderBy: sortBy
       });
       
-      // 알파벳 필터 적용
+      // 한글 초성 필터 적용
       let filtered = allDreams;
-      if (selectedLetter !== 'All') {
+      if (selectedInitial !== '전체') {
         filtered = allDreams.filter(dream => {
-          const firstLetter = dream.name.charAt(0).toUpperCase();
-          return firstLetter === selectedLetter;
+          const initial = getKoreanInitial(dream.name);
+          return initial === selectedInitial;
         });
       }
       
@@ -131,12 +148,12 @@ export default function DreamDictionary() {
       <div className="flex flex-col gap-8 py-8 md:py-12 px-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter">
-              Dream Dictionary
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal max-w-xl">
-              Search our comprehensive dictionary to uncover the psychological and symbolic meanings behind your dreams.
-            </p>
+          <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter">
+            꿈 사전
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal max-w-xl">
+            꿈 속 심리적·상징적 의미를 찾아보는 종합 사전
+          </p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -166,55 +183,55 @@ export default function DreamDictionary() {
       <div className="flex flex-wrap items-center justify-between gap-6 px-4 sm:px-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter text-slate-900 dark:text-slate-50">
-            Dream Dictionary
+            꿈 사전
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal max-w-xl">
-            Search our comprehensive dictionary to uncover the psychological and symbolic meanings behind your dreams.
+            꿈 속 심리적·상징적 의미를 찾아보는 종합 사전
           </p>
         </div>
       </div>
 
       {/* 필터 섹션 */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-y border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-4">
-        {/* 알파벳 필터 */}
+        {/* 한글 초성 필터 */}
         <div className="flex items-center gap-4 flex-wrap">
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Filter by Letter:</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">초성으로 찾기:</p>
           <div className="flex gap-1.5 flex-wrap">
-            {ALPHABET.slice(0, 4).map((letter) => (
+            {KOREAN_INITIALS.slice(0, 8).map((initial) => (
               <Button
-                key={letter}
-                variant={selectedLetter === letter ? 'default' : 'ghost'}
+                key={initial}
+                variant={selectedInitial === initial ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 w-8 shrink-0 ${
-                  selectedLetter === letter 
+                className={`h-8 min-w-8 shrink-0 ${
+                  selectedInitial === initial 
                     ? 'bg-primary text-primary-foreground' 
                     : 'hover:bg-gray-200 dark:hover:bg-gray-800'
                 }`}
                 onClick={() => {
-                  setSelectedLetter(letter);
+                  setSelectedInitial(initial);
                   setPage(1);
                 }}
               >
-                {letter === 'All' ? 'All' : letter === '...' ? '...' : letter}
+                {initial}
               </Button>
             ))}
             <span className="text-slate-400 dark:text-slate-500 py-2">...</span>
-            {ALPHABET.slice(-1).map((letter) => (
+            {KOREAN_INITIALS.slice(-3).map((initial) => (
               <Button
-                key={letter}
-                variant={selectedLetter === letter ? 'default' : 'ghost'}
+                key={initial}
+                variant={selectedInitial === initial ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 w-8 shrink-0 ${
-                  selectedLetter === letter 
+                className={`h-8 min-w-8 shrink-0 ${
+                  selectedInitial === initial 
                     ? 'bg-primary text-primary-foreground' 
                     : 'hover:bg-gray-200 dark:hover:bg-gray-800'
                 }`}
                 onClick={() => {
-                  setSelectedLetter(letter);
+                  setSelectedInitial(initial);
                   setPage(1);
                 }}
               >
-                {letter}
+                {initial}
               </Button>
             ))}
           </div>
@@ -225,12 +242,12 @@ export default function DreamDictionary() {
           <Select value={sortBy} onValueChange={(value: 'popularity' | 'name') => setSortBy(value)}>
             <SelectTrigger className="w-40 bg-card border border-slate-200 dark:border-slate-800 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               <SelectValue>
-                {sortBy === 'popularity' ? 'Sort by Popularity' : 'Sort by Alphabetical'}
+                {sortBy === 'popularity' ? '인기순' : '가나다순'}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="popularity">Sort by Popularity</SelectItem>
-              <SelectItem value="name">Sort by Alphabetical</SelectItem>
+              <SelectItem value="popularity">인기순</SelectItem>
+              <SelectItem value="name">가나다순</SelectItem>
             </SelectContent>
           </Select>
 
@@ -291,7 +308,7 @@ export default function DreamDictionary() {
           ) : (
             <div className="col-span-full text-center py-12">
               <p className="text-slate-500 dark:text-slate-400">
-                No dream symbols found.
+                검색 결과가 없습니다.
               </p>
             </div>
           )}
